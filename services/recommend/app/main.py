@@ -4,6 +4,7 @@ from shared.tracing import TracingMiddleware
 from shared.database import DatabaseManager
 from shared.cache import RedisClient
 from app.config import settings
+from app.routers import recommend as recommend_router
 
 app = FastAPI(title=settings.service_name, version="1.0.0")
 app.add_middleware(TracingMiddleware)
@@ -17,6 +18,7 @@ redis = RedisClient(url=settings.redis_url)
 
 @app.on_event("startup")
 async def startup():
+    from app.models.recommend import UserBehavior, Recommendation, ABTestConfig  # noqa: F401
     db.init_tables()
     await redis.connect()
 
@@ -31,6 +33,4 @@ async def health():
     return {"status": "ok", "service": settings.service_name}
 
 
-# from app.routers import recommend, ab_test
-# app.include_router(recommend.router, prefix="/api/recommend", tags=["recommend"])
-# app.include_router(ab_test.router, prefix="/api/ab-test", tags=["ab-test"])
+app.include_router(recommend_router.router, prefix="/api/recommend", tags=["recommend"])

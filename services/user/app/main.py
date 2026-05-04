@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from shared.tracing import TracingMiddleware
 from shared.database import DatabaseManager
 from app.config import settings
+from app.routers import user as user_router
 
 app = FastAPI(title=settings.service_name, version="1.0.0")
 app.add_middleware(TracingMiddleware)
@@ -15,6 +16,7 @@ db = DatabaseManager(
 
 @app.on_event("startup")
 async def startup():
+    from app.models.user import User, UserRole, UserProfile  # noqa: F401
     db.init_tables()
 
 
@@ -23,7 +25,4 @@ async def health():
     return {"status": "ok", "service": settings.service_name}
 
 
-# Register routers after implementing Phase 2
-# from app.routers import user, profile
-# app.include_router(user.router, prefix="/api/users", tags=["user"])
-# app.include_router(profile.router, prefix="/api/profiles", tags=["profile"])
+app.include_router(user_router.router, prefix="/api/users", tags=["user"])
