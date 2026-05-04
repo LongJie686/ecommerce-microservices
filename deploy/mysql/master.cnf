@@ -1,0 +1,15 @@
+[mysqld]
+server-id = 1
+log-bin = mysql-bin
+binlog-format = ROW
+max_connections = 500
+innodb_buffer_pool_size = 256M
+
+# Slow query log
+slow_query_log = 1
+slow_query_log_file = /var/lib/mysql/slow.log
+long_query_time = 1
+
+# Character set
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci

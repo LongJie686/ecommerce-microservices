@@ -1,0 +1,169 @@
+version: "3.8"
+
+services:
+  # --- Infrastructure ---
+  mysql-master:
+    image: mysql:8.0
+    container_name: ecommerce-mysql-master
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_master_data:/var/lib/mysql
+      - ./mysql/master.cnf:/etc/mysql/conf.d/master.cnf
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+
+  mysql-slave:
+    image: mysql:8.0
+    container_name: ecommerce-mysql-slave
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_slave_data:/var/lib/mysql
+      - ./mysql/slave.cnf:/etc/mysql/conf.d/slave.cnf
+    command: --default-authentication-plugin=mysql_native_password
+    depends_on:
+      - mysql-master
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: ecommerce-zk
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zk_data:/var/lib/zookeeper/data
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: ecommerce-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      - zookeeper
+
+  # --- Services ---
+  gateway:
+    build:
+      context: .
+      dockerfile: services/gateway/Dockerfile
+    container_name: ecommerce-gateway
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root123@mysql-master:3306/ecommerce
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      - mysql-master
+      - redis
+
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user/Dockerfile
+    container_name: ecommerce-user
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root123@mysql-master:3306/ecommerce_user
+      - READ_DATABASE_URL=mysql+pymysql://root:root123@mysql-slave:3306/ecommerce_user
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      - mysql-master
+
+  product-service:
+    build:
+      context: .
+      dockerfile: services/product/Dockerfile
+    container_name: ecommerce-product
+    ports:
+      - "8003:8003"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root123@mysql-master:3306/ecommerce_product
+      - READ_DATABASE_URL=mysql+pymysql://root:root123@mysql-slave:3306/ecommerce_product
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - mysql-master
+      - redis
+
+  recommend-service:
+    build:
+      context: .
+      dockerfile: services/recommend/Dockerfile
+    container_name: ecommerce-recommend
+    ports:
+      - "8004:8004"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root123@mysql-master:3306/ecommerce_recommend
+      - READ_DATABASE_URL=mysql+pymysql://root:root123@mysql-slave:3306/ecommerce_recommend
+      - REDIS_URL=redis://redis:6379/2
+    depends_on:
+      - mysql-master
+      - redis
+
+  crawler-service:
+    build:
+      context: .
+      dockerfile: services/crawler/Dockerfile
+    container_name: ecommerce-crawler
+    ports:
+      - "8005:8005"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root123@mysql-master:3306/ecommerce_crawler
+      - REDIS_URL=redis://redis:6379/3
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - mysql-master
+      - redis
+      - kafka
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: services/analytics/Dockerfile
+    container_name: ecommerce-analytics
+    ports:
+      - "8006:8006"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root123@mysql-master:3306/ecommerce_analytics
+      - READ_DATABASE_URL=mysql+pymysql://root:root123@mysql-slave:3306/ecommerce_analytics
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - mysql-master
+      - kafka
+
+  nginx:
+    image: nginx:alpine
+    container_name: ecommerce-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../frontend/dist:/usr/share/nginx/html
+    depends_on:
+      - gateway
+
+volumes:
+  mysql_master_data:
+  mysql_slave_data:
+  zk_data:
