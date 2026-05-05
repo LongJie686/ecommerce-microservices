@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import String, DateTime, Text, Index, Integer, Float
+from sqlalchemy import String, DateTime, Text, Index, Integer, Numeric
 from shared.database import Base
 
 
@@ -33,10 +34,10 @@ class CrawlResult(Base):
     task_id = Integer(nullable=False, index=True)
     platform = String(20, nullable=False)
     product_name = String(200, nullable=False)
-    price = Float(default=0.0)
-    original_price = Float(nullable=True)
+    price = Numeric(10, 2, default=Decimal("0.0"))
+    original_price = Numeric(10, 2, nullable=True)
     sales_count = Integer(default=0)
-    rating = Float(default=0.0)
+    rating = Numeric(3, 1, default=Decimal("0.0"))
     shop_name = String(200, default="")
     product_url = String(500, default="")
     image_url = String(500, default="")

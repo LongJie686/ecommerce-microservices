@@ -17,11 +17,11 @@ class ProductRepo:
 
     @staticmethod
     def get_by_id(session: Session, product_id: int) -> Product | None:
-        return session.query(Product).filter(Product.id == product_id).first()
+        return session.query(Product).filter(Product.id == product_id, Product.is_deleted == 0).first()
 
     @staticmethod
     def update(session: Session, product_id: int, **kwargs) -> Product | None:
-        product = session.query(Product).filter(Product.id == product_id).first()
+        product = session.query(Product).filter(Product.id == product_id, Product.is_deleted == 0).first()
         if not product:
             return None
         for key, value in kwargs.items():
@@ -34,7 +34,7 @@ class ProductRepo:
     def list_products(session: Session, category_id: int | None = None,
                       keyword: str | None = None, page: int = 1,
                       page_size: int = 20) -> tuple[list[Product], int]:
-        query = session.query(Product).filter(Product.status == 1)
+        query = session.query(Product).filter(Product.status == 1, Product.is_deleted == 0)
         if category_id:
             query = query.filter(Product.category_id == category_id)
         if keyword:
@@ -48,7 +48,7 @@ class ProductRepo:
 
     @staticmethod
     def list_hot(session: Session, limit: int = 10) -> list[Product]:
-        return session.query(Product).filter(Product.status == 1).order_by(
+        return session.query(Product).filter(Product.status == 1, Product.is_deleted == 0).order_by(
             Product.sales_count.desc()).limit(limit).all()
 
 

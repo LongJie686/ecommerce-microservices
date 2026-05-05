@@ -42,6 +42,7 @@ class Product(Base):
     source = String(50, default="")  # jd, taobao
     source_url = String(500, default="")
     status = Integer(default=1)  # 1=on_sale, 0=off_sale
+    is_deleted = Integer(default=0, nullable=False)  # logical deletion: 0=normal, 1=deleted
     created_at = DateTime(default=datetime.utcnow)
     updated_at = DateTime(default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -51,4 +52,7 @@ class Product(Base):
         Index("ix_products_category_status", "category_id", "status"),
         Index("ix_products_sales", "sales_count"),
         Index("ix_products_price", "price"),
+        # Covering index: list hot products query only needs status + sales_count + name/price,
+        # so this index covers the filter + sort + select columns without table lookup
+        Index("ix_products_covering_hot", "status", "sales_count", "name", "price"),
     )

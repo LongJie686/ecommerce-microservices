@@ -9,11 +9,11 @@ from app.models.user import User, UserRole, UserProfile
 class UserRepo:
     @staticmethod
     def get_by_username(session: Session, username: str) -> User | None:
-        return session.query(User).filter(User.username == username).first()
+        return session.query(User).filter(User.username == username, User.is_deleted == 0).first()
 
     @staticmethod
     def get_by_id(session: Session, user_id: int) -> User | None:
-        return session.query(User).filter(User.id == user_id).first()
+        return session.query(User).filter(User.id == user_id, User.is_deleted == 0).first()
 
     @staticmethod
     def get_profile(session: Session, user_id: int) -> UserProfile | None:
@@ -48,7 +48,7 @@ class UserRepo:
 
     @staticmethod
     def list_users(session: Session, page: int = 1, page_size: int = 20) -> tuple[list[User], int]:
-        query = session.query(User).filter(User.status == 1)
+        query = session.query(User).filter(User.status == 1, User.is_deleted == 0)
         total = query.count()
         users = query.offset((page - 1) * page_size).limit(page_size).all()
         return users, total

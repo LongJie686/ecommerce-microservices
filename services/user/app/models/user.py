@@ -18,6 +18,7 @@ class User(Base):
     nickname = String(100, default="")
     avatar = String(500, default="")
     status = Integer(default=1)  # 1=active, 0=disabled
+    is_deleted = Integer(default=0, nullable=False)  # logical deletion: 0=normal, 1=deleted
     created_at = DateTime(default=datetime.utcnow)
     updated_at = DateTime(default=datetime.utcnow, onupdate=datetime.utcnow)
 
