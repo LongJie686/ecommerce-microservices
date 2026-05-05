@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商数据分析系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <!-- 引入 Layui -->
+    <link rel="stylesheet" href="/static/lib/layui/css/layui.css">
+    <script src="/static/lib/layui/layui.js"></script>
+
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- API Gateway 配置 -->
+    <script src="/js/api-config.js"></script>
+
+    <!-- 引入新布局样式 -->
+    <link rel="stylesheet" href="/static/css/modern-layout.css">
+
+    <style>
+        /* 额外样式补充 */
+        .nav-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .nav-submenu.expanded {
+            max-height: 500px;
+        }
+
+        .nav-item.has-children::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-left: auto;
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.has-children.expanded::after {
+            transform: rotate(180deg);
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 54px;
+        }
+
+        .sidebar.collapsed .nav-submenu {
+            display: none;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            width: 100%;
+            height: 400px;
+        }
+
+        /* 数据卡片 */
+        .data-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* iframe 容器 */
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - 70px);
+            border: none;
+            background: transparent;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--card-radius);
+            width: 500px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i {
+            color: var(--primary);
+        }
+
+        .modal-close {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(0, 243, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 标签页内容 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <span class="logo-text">数据洞察</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- 主导航 -->
+                <div class="nav-section">
+                    <div class="nav-title">主菜单</div>
+                    <div class="nav-item active" onclick="showDashboard()">
+                        <i class="fas fa-home"></i>
+                        <span>仪表盘</span>
+                    </div>
+                    <div class="nav-item has-children" onclick="toggleSubmenu(this)">
+                        <i class="fas fa-database"></i>
+                        <span>数据采集</span>
+                    </div>
+                    <div class="nav-submenu">
+                        <div class="nav-item" onclick="openCrawlerModal()">
+                            <i class="fas fa-spider"></i>
+                            <span>启动爬虫</span>
+                        </div>
+                        <div class="nav-item" onclick="showTableList()">
+                            <i class="fas fa-table"></i>
+                            <span>数据表</span>
+                        </div>
+                        <div class="nav-item" onclick="syncData()">
+                            <i class="fas fa-sync"></i>
+                            <span>同步数据</span>
+                        </div>
+                    </div>
+                    <div class="nav-item has-children" onclick="toggleSubmenu(this)">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>数据分析</span>
+                    </div>
+                    <div class="nav-submenu">
+                        <div class="nav-item" onclick="loadAnalysis('/fenxi1', '智能推荐')">
+                            <i class="fas fa-star"></i>
+                            <span>智能推荐</span>
+                        </div>
+                        <div class="nav-item" onclick="loadAnalysis('/fenxi2', '评论分析')">
+                            <i class="fas fa-comments"></i>
+                            <span>评论分析</span>
+                        </div>
+                        <div class="nav-item" onclick="loadAnalysis('/fenxi3', '价格分析')">
+                            <i class="fas fa-tags"></i>
+                            <span>价格分析</span>
+                        </div>
+                        <div class="nav-item" onclick="loadAnalysis('/fenxi4', '高级推荐')">
+                            <i class="fas fa-brain"></i>
+                            <span>高级推荐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据表列表 -->
+                <div class="nav-section" id="table-nav-section" style="display: none;">
+                    <div class="nav-title">数据表</div>
+                    <div id="table-nav-list"></div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">管理员</div>
+                        <div class="user-role">系统管理员</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航 -->
+            <header class="top-header">
+                <div class="breadcrumb">
+                    <i class="fas fa-home"></i>
+                    <span>/</span>
+                    <span class="current" id="page-title">仪表盘</span>
+                </div>
+
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜索数据表、商品..." id="global-search">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="header-icon" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notification-count">3</span>
+                    </div>
+                    <div class="header-icon" onclick="toggleFullscreen()">
+                        <i class="fas fa-expand"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content-area" id="content-area">
+                <!-- Dashboard 首页 -->
+                <div id="dashboard-content" class="tab-content active">
+                    <div class="page-title">
+                        <h1>数据仪表盘</h1>
+                        <p>实时监控电商数据，智能分析商品趋势</p>
+                    </div>
+
+                    <!-- 统计卡片 -->
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <span class="stat-trend">+12%</span>
+                            </div>
+                            <div class="stat-value" id="stat-tables">-</div>
+                            <div class="stat-label">数据表数量</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon cyan">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <span class="stat-trend">+28%</span>
+                            </div>
+                            <div class="stat-value" id="stat-products">-</div>
+                            <div class="stat-label">商品总数</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <span class="stat-trend">+5%</span>
+                            </div>
+                            <div class="stat-value" id="stat-shops">-</div>
+                            <div class="stat-label">店铺数量</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <span class="stat-trend">实时</span>
+                            </div>
+                            <div class="stat-value" id="stat-sync">刚刚</div>
+                            <div class="stat-label">最后同步</div>
+                        </div>
+                    </div>
+
+                    <!-- 快捷操作 -->
+                    <div class="quick-actions">
+                        <div class="action-card" onclick="openCrawlerModal()">
+                            <div class="action-icon green">
+                                <i class="fas fa-spider"></i>
+                            </div>
+                            <h3>启动爬虫</h3>
+                            <p>采集京东、淘宝商品数据，支持关键词搜索和多页爬取</p>
+                        </div>
+
+                        <div class="action-card" onclick="loadAnalysis('/fenxi1', '智能推荐')">
+                            <div class="action-icon cyan">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3>智能推荐</h3>
+                            <p>基于多维度评分算法，为您推荐最优商品</p>
+                        </div>
+
+                        <div class="action-card" onclick="showAIChat()">
+                            <div class="action-icon blue">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h3>AI助手</h3>
+                            <p>智能问答、数据分析、自然语言查询数据库</p>
+                        </div>
+                    </div>
+
+                    <!-- 主内容网格 -->
+                    <div class="main-grid">
+                        <!-- 最近数据表 -->
+                        <div class="glass-panel">
+                            <div class="panel-header">
+                                <div class="panel-title">
+                                    <i class="fas fa-table"></i>
+                                    <span>最近数据表</span>
+                                </div>
+                                <button class="btn btn-secondary" onclick="showTableList()">
+                                    <span>查看全部</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            <div class="panel-body">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>表名</th>
+                                            <th>记录数</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-tables">
+                                        <tr>
+                                            <td colspan="4" style="text-align: center; color: var(--text-muted);">
+                                                加载中...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 最近活动 -->
+                        <div class="glass-panel">
+                            <div class="panel-header">
+                                <div class="panel-title">
+                                    <i class="fas fa-clock"></i>
+                                    <span>最近活动</span>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <div class="activity-list" id="activity-list">
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-sync"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <h4>数据同步完成</h4>
+                                            <p>Hive 到 MySQL 同步成功</p>
+                                            <div class="activity-time">刚刚</div>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-spider"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <h4>爬虫任务完成</h4>
+                                            <p>采集了 150 条商品数据</p>
+                                            <div class="activity-time">2小时前</div>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <h4>生成分析报告</h4>
+                                            <p>价格分布分析报告已生成</p>
+                                            <div class="activity-time">昨天</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据表内容 -->
+                <div id="table-content" class="tab-content">
+                    <div class="page-title">
+                        <h1 id="table-title">数据表</h1>
+                        <p>查看和管理您的商品数据</p>
+                    </div>
+                    <div class="glass-panel">
+                        <div class="panel-body" style="padding: 0;">
+                            <iframe id="table-iframe" class="iframe-container"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分析内容 -->
+                <div id="analysis-content" class="tab-content">
+                    <div class="page-title">
+                        <h1 id="analysis-title">数据分析</h1>
+                        <p>多维度数据分析和智能推荐</p>
+                    </div>
+                    <div class="glass-panel">
+                        <div class="panel-body" style="padding: 0;">
+                            <iframe id="analysis-iframe" class="iframe-container"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI助手悬浮窗 -->
+    <div class="ai-assistant" id="ai-assistant">
+        <div class="ai-toggle" onclick="toggleAIChat()">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="ai-chat-window" id="ai-chat-window">
+            <div class="ai-chat-header">
+                <div class="ai-chat-title">
+                    <i class="fas fa-robot"></i>
+                    <span>AI智能助手</span>
+                </div>
+                <div class="ai-chat-close" onclick="toggleAIChat()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="ai-chat-body" id="ai-chat-body">
+                <div class="activity-item" style="border-left-color: var(--primary);">
+                    <div class="activity-icon" style="background: rgba(0, 255, 136, 0.15);">
+                        <i class="fas fa-robot" style="color: var(--primary);"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>AI助手</h4>
+                        <p>您好！我是您的数据分析助手。我可以帮您：</p>
+                        <ul style="margin-top: 8px; padding-left: 16px; color: var(--text-muted); font-size: 12px;">
+                            <li>查询数据库中的商品信息</li>
+                            <li>分析价格和评论数据</li>
+                            <li>推荐最优商品</li>
+                            <li>回答关于数据的问题</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-chat-input">
+                <input type="text" placeholder="输入您的问题..." id="ai-input" onkeypress="handleAIKeyPress(event)">
+                <button onclick="sendAIMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 爬虫启动模态框 -->
+    <div class="modal-overlay" id="crawler-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-spider"></i>
+                    <span>启动数据采集</span>
+                </div>
+                <div class="modal-close" onclick="closeCrawlerModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">选择平台</label>
+                    <select class="form-select" id="crawler-platform">
+                        <option value="jd">京东</option>
+                        <option value="taobao">淘宝</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">搜索关键词</label>
+                    <input type="text" class="form-input" id="crawler-keyword" placeholder="输入商品关键词，如：手机">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">爬取页数</label>
+                    <input type="number" class="form-input" id="crawler-pages" value="3" min="1" max="10">
+                </div>
+                <div class="progress-container" id="crawler-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">准备开始...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCrawlerModal()">取消</button>
+                <button class="btn btn-primary" onclick="startCrawler()" id="start-crawler-btn">
+                    <i class="fas fa-play"></i>
+                    <span>开始采集</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">操作成功</span>
+    </div>
+
+    <script>
+        // ==================== 全局变量 ====================
+        let currentPage = 'dashboard';
+        let tableList = [];
+        let isCrawlerRunning = false;
+
+        // ==================== 初始化 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardStats();
+            loadRecentTables();
+            initSearch();
+        });
+
+        // ==================== 侧边栏操作 ====================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('expanded');
+            element.nextElementSibling.classList.toggle('expanded');
+        }
+
+        // ==================== 页面切换 ====================
+        function showDashboard() {
+            switchTab('dashboard-content');
+            updateBreadcrumb('仪表盘');
+            setActiveNav(0);
+            loadDashboardStats();
+        }
+
+        function showTableList() {
+            loadTables();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function updateBreadcrumb(title) {
+            document.getElementById('page-title').textContent = title;
+        }
+
+        function setActiveNav(index) {
+            document.querySelectorAll('.nav-item').forEach((item, i) => {
+                if (!item.parentElement.classList.contains('nav-submenu')) {
+                    item.classList.remove('active');
+                }
+            });
+            const mainNavs = document.querySelectorAll('.nav-section:first-child > .nav-item:not(.has-children)');
+            if (mainNavs[index]) {
+                mainNavs[index].classList.add('active');
+            }
+        }
+
+        // ==================== 数据加载 ====================
+        function loadDashboardStats() {
+            fetch('/api/analytics/dashboard', {headers: getAuthHeaders()})
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        animateNumber('stat-tables', 0, data.total_tables || 0, 1000);
+                        animateNumber('stat-products', 0, data.total_products || 0, 1000);
+                        animateNumber('stat-shops', 0, data.total_shops || 0, 1000);
+                    }
+                })
+                .catch(err => console.error('加载统计数据失败:', err));
+        }
+
+        function animateNumber(id, start, end, duration) {
+            const element = document.getElementById(id);
+            if (!element) return;
+            const range = end - start;
+            const step = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 16);
+        }
+
+        function loadRecentTables() {
+            fetch('/api/products', {headers: getAuthHeaders()})
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        tableList = data.data;
+                        renderRecentTables(data.data.slice(0, 5));
+                        renderTableNav(data.data);
+                    }
+                })
+                .catch(err => console.error('加载数据表失败:', err));
+        }
+
+        function renderRecentTables(tables) {
+            const tbody = document.getElementById('recent-tables');
+            if (tables.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">暂无数据表</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = tables.map(table => `
+                <tr>
+                    <td>${table}</td>
+                    <td>-</td>
+                    <td><span class="status-badge success">可用</span></td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="viewTable('${table}')">
+                            查看
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTableNav(tables) {
+            const container = document.getElementById('table-nav-list');
+            const section = document.getElementById('table-nav-section');
+
+            if (tables.length > 0) {
+                section.style.display = 'block';
+                container.innerHTML = tables.slice(0, 10).map(table => `
+                    <div class="nav-item" onclick="viewTable('${table}')">
+                        <i class="fas fa-table"></i>
+                        <span>${table}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function viewTable(tableName) {
+            switchTab('table-content');
+            updateBreadcrumb('数据表：' + tableName);
+            document.getElementById('table-title').textContent = tableName;
+            document.getElementById('table-iframe').src = '/' + tableName;
+        }
+
+        // ==================== 爬虫功能 ====================
+        function openCrawlerModal() {
+            document.getElementById('crawler-modal').classList.add('active');
+            document.getElementById('crawler-progress').style.display = 'none';
+            document.getElementById('start-crawler-btn').disabled = false;
+            document.getElementById('start-crawler-btn').innerHTML = '<i class="fas fa-play"></i><span>开始采集</span>';
+        }
+
+        function closeCrawlerModal() {
+            if (isCrawlerRunning) {
+                if (!confirm('爬虫正在运行中，确定要关闭吗？')) return;
+            }
+            document.getElementById('crawler-modal').classList.remove('active');
+        }
+
+        function startCrawler() {
+            const platform = document.getElementById('crawler-platform').value;
+            const keyword = document.getElementById('crawler-keyword').value;
+            const pages = document.getElementById('crawler-pages').value;
+
+            if (!keyword) {
+                showToast('请输入搜索关键词', 'error');
+                return;
+            }
+
+            isCrawlerRunning = true;
+            document.getElementById('crawler-progress').style.display = 'block';
+            document.getElementById('start-crawler-btn').disabled = true;
+            document.getElementById('start-crawler-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>采集中...</span>';
+
+            // 模拟进度
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                updateProgress(progress, `正在采集第 ${Math.floor(progress / 10)} 页数据...`);
+            }, 1000);
+
+            const endpoint = '/api/crawler/start';
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify({ keyword, pages: parseInt(pages), platform })
+            })
+            .then(res => res.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                updateProgress(100, '采集完成！');
+
+                setTimeout(() => {
+                    isCrawlerRunning = false;
+                    closeCrawlerModal();
+                    showToast('数据采集成功！', 'success');
+                    loadRecentTables();
+                    addActivity('数据采集完成', `成功采集 "${keyword}" 的 ${data.count || 0} 条数据`);
+                }, 500);
+            })
+            .catch(err => {
+                clearInterval(progressInterval);
+                isCrawlerRunning = false;
+                document.getElementById('start-crawler-btn').disabled = false;
+                document.getElementById('start-crawler-btn').innerHTML = '<i class="fas fa-play"></i><span>开始采集</span>';
+                showToast('采集失败：' + err.message, 'error');
+            });
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = text;
+        }
+
+        // ==================== 数据分析 ====================
+        function loadAnalysis(url, title) {
+            switchTab('analysis-content');
+            updateBreadcrumb(title);
+            document.getElementById('analysis-title').textContent = title;
+            document.getElementById('analysis-iframe').src = url;
+        }
+
+        // ==================== AI助手 ====================
+        function toggleAIChat() {
+            document.getElementById('ai-chat-window').classList.toggle('active');
+        }
+
+        function showAIChat() {
+            document.getElementById('ai-chat-window').classList.add('active');
+        }
+
+        function handleAIKeyPress(e) {
+            if (e.key === 'Enter') sendAIMessage();
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // 添加用户消息
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // 发送请求
+            fetch('/api/recommend/behavior', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify({ message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                addChatMessage(data.response || '抱歉，我没有理解您的问题。', 'ai');
+            })
+            .catch(() => {
+                addChatMessage('抱歉，服务暂时不可用。', 'ai');
+            });
+        }
+
+        function addChatMessage(text, sender) {
+            const body = document.getElementById('ai-chat-body');
+            const isAI = sender === 'ai';
+
+            const html = `
+                <div class="activity-item" style="border-left-color: ${isAI ? 'var(--secondary)' : 'var(--primary)'}; margin-bottom: 12px;">
+                    <div class="activity-icon" style="background: ${isAI ? 'rgba(0, 243, 255, 0.15)' : 'rgba(0, 255, 136, 0.15)'};">
+                        <i class="fas ${isAI ? 'fa-robot' : 'fa-user'}" style="color: ${isAI ? 'var(--secondary)' : 'var(--primary)'};"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>${isAI ? 'AI助手' : '我'}</h4>
+                        <p style="white-space: pre-wrap;">${text}</p>
+                    </div>
+                </div>
+            `;
+
+            body.insertAdjacentHTML('beforeend', html);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // ==================== 数据同步 ====================
+        function syncData() {
+            showToast('正在同步数据...', 'success');
+
+            fetch('/api/analytics/dashboard', { method: 'GET', headers: getAuthHeaders() })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('数据同步成功！', 'success');
+                        loadRecentTables();
+                        addActivity('数据同步完成', 'Hive 到 MySQL 同步成功');
+                    } else {
+                        showToast('同步失败：' + data.message, 'error');
+                    }
+                })
+                .catch(() => showToast('同步失败', 'error'));
+        }
+
+        // ==================== 辅助功能 ====================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('i');
+            const text = document.getElementById('toast-message');
+
+            toast.className = 'toast ' + type;
+            text.textContent = message;
+
+            if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle';
+            } else {
+                icon.className = 'fas fa-check-circle';
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function addActivity(title, desc) {
+            const list = document.getElementById('activity-list');
+            const html = `
+                <div class="activity-item" style="animation: fadeIn 0.3s ease;">
+                    <div class="activity-icon">
+                        <i class="fas fa-info"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>${title}</h4>
+                        <p>${desc}</p>
+                        <div class="activity-time">刚刚</div>
+                    </div>
+                </div>
+            `;
+            list.insertAdjacentHTML('afterbegin', html);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function toggleNotifications() {
+            showToast('暂无新通知', 'success');
+        }
+
+        function initSearch() {
+            const searchInput = document.getElementById('global-search');
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const keyword = searchInput.value.trim();
+                    if (keyword) {
+                        showToast('搜索功能开发中...', 'success');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

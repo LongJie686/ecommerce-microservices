@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default('数据分析') }} - 电商数据分析系统</title>
+
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ==================== 科技风格变量 ==================== */
+        :root {
+            --primary: #00ff88;
+            --secondary: #00f3ff;
+            --accent: #00ccff;
+            --dark-bg: #0a0f14;
+            --panel-bg: rgba(16, 24, 32, 0.95);
+            --glass-bg: rgba(20, 30, 40, 0.8);
+            --border-glow: rgba(0, 243, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --card-radius: 16px;
+        }
+
+        /* ==================== 基础样式 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 30px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 网格背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ==================== 极光背景 ==================== */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .aurora-bg::before,
+        .aurora-bg::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at center,
+                rgba(0, 255, 136, 0.1) 0%,
+                rgba(0, 243, 255, 0.08) 25%,
+                rgba(0, 100, 255, 0.03) 50%,
+                transparent 70%);
+            animation: aurora-move 20s ease-in-out infinite;
+            filter: blur(60px);
+        }
+
+        .aurora-bg::after {
+            background: radial-gradient(ellipse at center,
+                rgba(0, 243, 255, 0.08) 0%,
+                rgba(100, 0, 255, 0.05) 30%,
+                transparent 80%);
+            animation: aurora-move-2 25s ease-in-out infinite;
+            animation-delay: -5s;
+        }
+
+        @keyframes aurora-move {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.6; }
+            25% { transform: translate(5%, 5%) rotate(5deg) scale(1.1); opacity: 0.8; }
+            50% { transform: translate(-3%, 8%) rotate(-3deg) scale(0.95); opacity: 0.7; }
+            75% { transform: translate(-5%, -3%) rotate(2deg) scale(1.05); opacity: 0.9; }
+        }
+
+        @keyframes aurora-move-2 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.5; }
+            33% { transform: translate(-5%, 3%) rotate(-5deg) scale(1.15); opacity: 0.7; }
+            66% { transform: translate(5%, -5%) rotate(3deg) scale(0.9); opacity: 0.6; }
+        }
+
+        /* ==================== 页面标题 ==================== */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            color: var(--secondary);
+            -webkit-text-fill-color: var(--secondary);
+            font-size: 32px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        /* ==================== 返回按钮 ==================== */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--secondary);
+            transform: translateX(-3px);
+        }
+
+        /* ==================== 图表容器 ==================== */
+        .charts-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .chart-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .chart-section:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 15px 50px rgba(0, 243, 255, 0.1);
+        }
+
+        .chart-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chart-header i {
+            color: var(--secondary);
+            font-size: 20px;
+        }
+
+        .chart-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .chart-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .chart-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-body img:hover {
+            transform: scale(1.02);
+        }
+
+        /* ==================== 统计卡片 ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-glow);
+            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--primary);
+        }
+
+        .stat-icon.blue {
+            background: rgba(0, 243, 255, 0.15);
+            color: var(--secondary);
+        }
+
+        .stat-icon.purple {
+            background: rgba(100, 100, 255, 0.15);
+            color: #6464ff;
+        }
+
+        .stat-icon.orange {
+            background: rgba(255, 150, 0, 0.15);
+            color: #ff9600;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ==================== 分析描述 ==================== */
+        .analysis-desc {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+        }
+
+        .analysis-desc h3 {
+            font-size: 16px;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .analysis-desc p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        /* ==================== 空状态 ==================== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--card-radius);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state p {
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        /* ==================== 滚动条 ==================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+        }
+
+        /* ==================== 响应式 ==================== */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 极光背景 -->
+    <div class="aurora-bg"></div>
+
+    <!-- 返回按钮 -->
+    <a href="/index" class="back-btn" target="_parent">
+        <i class="fas fa-arrow-left"></i>
+        <span>返回首页</span>
+    </a>
+
+    {% if images %}
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-chart-pie"></i>
+            <span>{{ title | default('数据分析') }}</span>
+        </h1>
+        <p class="page-subtitle">基于电商数据的智能分析与可视化</p>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_products | default('-') }}</div>
+            <div class="stat-label">商品总数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fas fa-yen-sign"></i>
+            </div>
+            <div class="stat-value">{{ stats.avg_price | default('-') }}</div>
+            <div class="stat-label">平均价格</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_shops | default('-') }}</div>
+            <div class="stat-label">店铺数量</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fas fa-comment"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_comments | default('-') }}</div>
+            <div class="stat-label">总评论数</div>
+        </div>
+    </div>
+
+    <!-- 分析说明 -->
+    <div class="analysis-desc">
+        <h3><i class="fas fa-info-circle"></i>分析说明</h3>
+        <p>{{ analysis_desc | default('本分析展示了商品价格分布、评论数量分布以及店铺销售情况等多维度数据，帮助您快速了解市场趋势。') }}</p>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="charts-wrapper">
+        {% for key, img in images.items() %}
+        <div class="chart-section">
+            <div class="chart-header">
+                <i class="fas fa-chart-bar"></i>
+                <h2>{{ chart_titles[key] | default('数据图表') }}</h2>
+            </div>
+            <div class="chart-body">
+                <img src="data:image/png;base64,{{ img }}" alt="{{ key }}" loading="lazy">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- 空状态 -->
+    <div class="empty-state">
+        <i class="fas fa-chart-line"></i>
+        <p>暂无分析数据</p>
+    </div>
+    {% endif %}
+
+    <script>
+        // 图片加载动画
+        document.querySelectorAll('.chart-body img').forEach(img => {
+            img.style.opacity = '0';
+            img.style.transform = 'translateY(20px)';
+            img.style.transition = 'all 0.5s ease';
+
+            img.addEventListener('load', () => {
+                img.style.opacity = '1';
+                img.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

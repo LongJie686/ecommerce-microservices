@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录-京东购物信息查询</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="css/font.css">
+    <link rel="stylesheet" href="css/weadmin.css">
+    <link rel="stylesheet" href="css/custom-style.css">
+    <script src="lib/layui/layui.js" charset="utf-8"></script>
+    <style>
+        /* 科技感登录页面背景 */
+        .login-bg {
+            background: #050508;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 科技网格背景 */
+        .login-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridMove 30s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        /* 扫描线效果 */
+        .login-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 243, 255, 0.02) 50%, transparent 100%);
+            background-size: 100% 3px;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* 浮动能量球 */
+        .energy-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: floatOrb 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .energy-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(0, 255, 136, 0.15);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .energy-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 255, 136, 0.12);
+            bottom: -80px;
+            left: -80px;
+            animation-delay: -4s;
+        }
+
+        .energy-orb-3 {
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 243, 255, 0.1);
+            top: 50%;
+            left: 50%;
+            animation-delay: -2s;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+            25% { transform: translate(30px, -30px) scale(1.1); opacity: 0.7; }
+            50% { transform: translate(-20px, 20px) scale(0.9); opacity: 0.6; }
+            75% { transform: translate(20px, 30px) scale(1.05); opacity: 0.55; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+            50% { transform: scale(1.02); box-shadow: 0 25px 80px rgba(0, 243, 255, 0.2); }
+        }
+
+        @keyframes neonGlow {
+            0%, 100% { text-shadow: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3), 0 0 30px rgba(0, 243, 255, 0.1); }
+            50% { text-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 0 0 40px rgba(0, 243, 255, 0.4), 0 0 60px rgba(0, 243, 255, 0.2); }
+        }
+
+        /* 登录卡片 - 金属科技风格 */
+        .login {
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.15), 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            padding: 55px 50px;
+            min-width: 450px;
+            animation: slideUp 0.7s cubic-bezier(0.4, 0, 0.2, 1), pulse 4s ease-in-out infinite 1s;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        /* 顶部发光条 */
+        .login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00f3ff, #00ccff, #00f3ff, transparent);
+            background-size: 200% 100%;
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { background-position: 0% 50%; opacity: 0.7; }
+            50% { background-position: 100% 50%; opacity: 1; }
+        }
+
+        /* 角落装饰 */
+        .login::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* 确保 message 可见 - 其他样式在 custom-style.css 中定义 */
+        .login .message {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 鼠标跟随光效 */
+        .cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, rgba(0, 255, 136, 0.08) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+            filter: blur(40px);
+        }
+
+        .cursor-glow-secondary {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.2) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.15s ease;
+            filter: blur(20px);
+        }
+
+        /* 输入框样式 - 科技感 */
+        .layui-input {
+            padding: 16px 20px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(10, 10, 18, 0.8);
+            color: #fff;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .layui-input:hover {
+            border-color: rgba(0, 243, 255, 0.4);
+            background: rgba(15, 15, 25, 0.9);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+
+        .layui-input:focus {
+            outline: none;
+            border-color: #00f3ff;
+            background: rgba(10, 10, 18, 0.95);
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .layui-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 输入框图标装饰 */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(0, 243, 255, 0.5);
+            font-size: 20px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.3));
+        }
+
+        .input-wrapper input {
+            padding-left: 55px !important;
+        }
+
+        .input-wrapper:focus-within i {
+            color: #00f3ff;
+            filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.6));
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* 登录按钮 - 金属实体质感 */
+        .loginin {
+            /* 金属渐变背景 - 左上亮右下暗 */
+            background: linear-gradient(145deg, #00ff88 0%, #00ccff 50%, #00aadd 100%);
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px 35px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* 实体立体感：左上高光虚化，右下阴影增强 */
+            box-shadow:
+                /* 外发光 */
+                0 8px 25px rgba(0, 255, 136, 0.4),
+                0 4px 10px rgba(0, 0, 0, 0.6),
+                /* 内阴影 - 左上亮(凸起感) */
+                inset 2px 2px 5px rgba(255, 255, 255, 0.5),
+                /* 内阴影 - 右下暗(厚度感) */
+                inset -3px -3px 8px rgba(0, 0, 0, 0.6);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loginin::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .loginin:hover::before {
+            left: 100%;
+        }
+
+        .loginin:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(145deg, #00ffaa 0%, #00ddff 50%, #00bbee 100%);
+            /* 悬停时增强外发光 */
+            box-shadow:
+                0 12px 35px rgba(0, 255, 136, 0.5),
+                0 6px 15px rgba(0, 0, 0, 0.4),
+                inset 2px 2px 5px rgba(255, 255, 255, 0.6),
+                inset -3px -3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .loginin:active {
+            /* 按下时凹陷效果 - 反转内阴影 */
+            transform: translateY(1px);
+            background: linear-gradient(145deg, #00aa88 0%, #00aadd 50%, #0099cc 100%);
+            box-shadow:
+                0 4px 15px rgba(0, 255, 136, 0.3),
+                /* 按下时内阴影反转 */
+                inset 2px 2px 8px rgba(0, 0, 0, 0.6),
+                inset -2px -2px 5px rgba(255, 255, 255, 0.2);
+        }
+
+        .login form > div:last-child {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            margin-top: 25px;
+            letter-spacing: 1px;
+        }
+
+        /* 分隔线样式 */
+        .hr15, .hr20 {
+            border: none;
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 243, 255, 0.2) 50%, transparent 100%);
+            opacity: 0.5;
+        }
+
+        .hr15 { height: 15px; }
+        .hr20 { height: 20px; }
+
+        /* 响应式 */
+        @media screen and (max-width: 480px) {
+            .login {
+                min-width: auto;
+                width: 90%;
+                padding: 45px 30px;
+            }
+
+            .message {
+                font-size: 28px;
+                letter-spacing: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body class="login-bg">
+    <!-- 鼠标跟随光效 -->
+    <div class="cursor-glow" id="cursor-glow"></div>
+    <div class="cursor-glow-secondary" id="cursor-glow-secondary"></div>
+
+    <!-- 背景能量球 -->
+    <div class="energy-orb energy-orb-1"></div>
+    <div class="energy-orb energy-orb-2"></div>
+    <div class="energy-orb energy-orb-3"></div>
+
+    <div class="login" style="border-radius: 20px;">
+        <div class="message">账号登录</div>
+        <div id="darkbannerwrap"></div>
+
+        <form method="post" class="layui-form">
+            <div class="input-wrapper">
+                <i>&#128100;</i>
+                <input name="username" placeholder="用户名" type="text" lay-verify="required" class="layui-input"
+                    style="font-family: 'Microsoft YaHei', Arial, sans-serif;">
+            </div>
+            <hr class="hr15">
+            <div class="input-wrapper">
+                <i>&#128274;</i>
+                <input name="password" lay-verify="required" placeholder="密码" type="password" class="layui-input"
+                    style="font-family: 'Microsoft YaHei', Arial, sans-serif;">
+            </div>
+            <hr class="hr15">
+            <input class="loginin" value="登录" lay-submit lay-filter="login"
+                style="width:100%; font-family: 'Microsoft YaHei', Arial, sans-serif;" type="submit">
+            <hr class="hr20">
+            <div style="font-family: 'Microsoft YaHei', Arial, sans-serif;">
+                请输入账号和密码
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        // 颜色阶段配置：绿 -> 蓝 -> 黄 -> 红 -> 紫 -> 黑 (使用RGB插值实现平滑渐变)
+        const flameColors = [
+            { r: 0, g: 255, b: 0 },      // 绿色 (0s)
+            { r: 0, g: 243, b: 255 },    // 蓝色 (1s)
+            { r: 255, g: 255, b: 0 },    // 黄色 (2s)
+            { r: 255, g: 68, b: 0 },     // 红色 (3s)
+            { r: 255, g: 0, b: 255 },    // 紫色 (4s)
+            { r: 0, g: 0, b: 0 }         // 黑色 (5s)
+        ];
+
+        // RGB颜色插值函数
+        function interpolateColor(color1, color2, factor) {
+            return {
+                r: Math.round(color1.r + (color2.r - color1.r) * factor),
+                g: Math.round(color1.g + (color2.g - color1.g) * factor),
+                b: Math.round(color1.b + (color2.b - color1.b) * factor)
+            };
+        }
+
+        // 将RGB对象转换为CSS颜色字符串
+        function rgbToString(color) {
+            return `rgb(${color.r}, ${color.g}, ${color.b})`;
+        }
+
+        // 根据长按时间获取颜色 (平滑渐变)
+        function getFlameColor(pressDuration) {
+            const stageDuration = 1000; // 每个阶段1秒
+            const totalStages = flameColors.length - 1;
+            const maxDuration = stageDuration * totalStages;
+
+            // 限制最大时间
+            const clampedDuration = Math.min(pressDuration, maxDuration);
+
+            // 计算当前阶段和插值因子
+            const stageIndex = Math.floor(clampedDuration / stageDuration);
+            const factor = (clampedDuration % stageDuration) / stageDuration;
+
+            const currentColor = flameColors[stageIndex];
+            const nextColor = flameColors[Math.min(stageIndex + 1, totalStages)];
+
+            // 插值计算中间颜色
+            const interpolated = interpolateColor(currentColor, nextColor, factor);
+
+            // 计算中间色调和发光色
+            const inner = interpolated;
+            const middle = interpolateColor(interpolated, {r: 255, g: 255, b: 255}, 0.3);
+            const outer = interpolateColor(interpolated, {r: 100, g: 100, b: 100}, 0.5);
+
+            return {
+                inner: rgbToString(inner),
+                middle: rgbToString(middle),
+                outer: rgbToString(outer),
+                glow: rgbToString(inner)
+            };
+        }
+
+        // 科技感粒子效果 - 普通粒子
+        function createParticle(x, y, type = 'normal', pressDuration = 0) {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.width = type === 'spark' ? '4px' : '6px';
+            particle.style.height = type === 'spark' ? '4px' : '6px';
+            particle.style.borderRadius = '50%';
+
+            if (type === 'spark') {
+                // 动态火焰颜色
+                const color = getFlameColor(pressDuration);
+                particle.style.background = `radial-gradient(circle, ${color.inner} 0%, ${color.middle} 50%, ${color.outer} 100%)`;
+                particle.style.boxShadow = `0 0 10px ${color.glow}, 0 0 20px ${color.middle}, 0 0 30px ${color.outer}`;
+            } else if (type === 'blue') {
+                // 蓝色科技感粒子
+                particle.style.background = 'linear-gradient(135deg, #00f3ff, #00ccff)';
+                particle.style.boxShadow = '0 0 10px #00f3ff, 0 0 20px #00ff88';
+            } else {
+                // 默认青色粒子
+                particle.style.background = 'linear-gradient(135deg, #00f3ff, #00ccff)';
+                particle.style.boxShadow = '0 0 10px #00f3ff, 0 0 20px #00ff88';
+            }
+
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '9999';
+            particle.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            document.body.appendChild(particle);
+
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = type === 'spark' ? 80 + Math.random() * 120 : 50 + Math.random() * 100;
+            const tx = Math.cos(angle) * velocity;
+            const ty = Math.sin(angle) * velocity;
+
+            setTimeout(() => {
+                particle.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+                particle.style.opacity = '0';
+            }, 10);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 800);
+        }
+
+        // 创建火星尾迹效果
+        function createSparkTrail(x, y, count = 1, pressDuration = 0) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    // 在鼠标周围随机位置生成火星
+                    const offsetX = (Math.random() - 0.5) * 30;
+                    const offsetY = (Math.random() - 0.5) * 30;
+                    createParticle(x + offsetX, y + offsetY, 'spark', pressDuration);
+                }, i * 20);
+            }
+        }
+
+        // 点击效果 - 普通粒子
+        document.addEventListener('click', function(e) {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    createParticle(e.clientX, e.clientY, 'blue');
+                }, i * 50);
+            }
+        });
+
+        // 鼠标跟随光效
+        const cursorGlow = document.getElementById('cursor-glow');
+        const cursorGlowSecondary = document.getElementById('cursor-glow-secondary');
+        let mouseX = 0, mouseY = 0;
+        let glowX = 0, glowY = 0;
+        let glow2X = 0, glow2Y = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // 主光效跟随
+        function animateGlow() {
+            glowX += (mouseX - glowX) * 0.1;
+            glowY += (mouseY - glowY) * 0.1;
+            cursorGlow.style.left = glowX + 'px';
+            cursorGlow.style.top = glowY + 'px';
+
+            glow2X += (mouseX - glow2X) * 0.05;
+            glow2Y += (mouseY - glow2Y) * 0.05;
+            cursorGlowSecondary.style.left = glow2X + 'px';
+            cursorGlowSecondary.style.top = glow2Y + 'px';
+
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+
+        // 长按火星效果 - 使用全局变量存储当前鼠标位置
+        let longPressInterval = null;
+        let isLongPress = false;
+        let longPressTimer = null;
+        let currentMouseX = 0, currentMouseY = 0;
+        let pressStartTime = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            currentMouseX = e.clientX;
+            currentMouseY = e.clientY;
+        });
+
+        document.addEventListener('mousedown', function(e) {
+            currentMouseX = e.clientX;
+            currentMouseY = e.clientY;
+            isLongPress = false;
+            pressStartTime = Date.now();
+
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                // 开始连续喷射火星
+                let count = 0;
+                longPressInterval = setInterval(() => {
+                    // 计算长按时间
+                    const pressDuration = Date.now() - pressStartTime;
+
+                    // 频率递增，像火星四溅
+                    const sparkCount = 2 + Math.floor(count / 5);
+
+                    // 在鼠标位置周围生成火星，传递长按时间以改变颜色
+                    createSparkTrail(currentMouseX, currentMouseY, sparkCount, pressDuration);
+                    count++;
+
+                    // 随着时间推移，火星喷射范围扩大
+                    if (count > 20) {
+                        for (let i = 0; i < 3; i++) {
+                            const offsetX = (Math.random() - 0.5) * 50;
+                            const offsetY = (Math.random() - 0.5) * 50;
+                            createParticle(currentMouseX + offsetX, currentMouseY + offsetY, 'spark', pressDuration);
+                        }
+                    }
+                }, 50);
+            }, 300); // 300ms后触发长按
+        });
+
+        document.addEventListener('mouseup', function() {
+            clearTimeout(longPressTimer);
+            if (longPressInterval) {
+                clearInterval(longPressInterval);
+                longPressInterval = null;
+            }
+            isLongPress = false;
+            pressStartTime = 0;
+        });
+
+        document.addEventListener('mouseleave', function() {
+            clearTimeout(longPressTimer);
+            if (longPressInterval) {
+                clearInterval(longPressInterval);
+                longPressInterval = null;
+            }
+            isLongPress = false;
+            pressStartTime = 0;
+        });
+
+        // 按钮悬停效果增强
+        document.querySelectorAll('.loginin').forEach(btn => {
+            btn.addEventListener('mouseenter', function(e) {
+                const rect = btn.getBoundingClientRect();
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const x = rect.left + Math.random() * rect.width;
+                        const y = rect.top + Math.random() * rect.height;
+                        createParticle(x, y, 'blue');
+                    }, i * 100);
+                }
+            });
+        });
+
+        // 输入框聚焦效果
+        document.querySelectorAll('.layui-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        layui.config({
+            base: '/js/'
+            , version: '101100'
+        }).extend({
+            admin: 'admin'
+            , http: 'http'
+        });
+        layui.use(['form', 'admin', 'http'], function () {
+            var form = layui.form
+                , admin = layui.admin
+                , http = layui.http;
+
+            //监听提交
+            form.on('submit(login)', function (data) {
+                console.log(data)
+                http.login(data.field)
+                return false;
+            });
+        });
+    </script>
+    <!-- 底部结束 -->
+</body>
+
+</html>

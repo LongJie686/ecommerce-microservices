@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>统计图表-WeAdmin Frame型后台管理系统-WeAdmin 1.0</title>
+  <meta name="renderer" content="webkit|ie-comp|ie-stand">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="stylesheet" href="../../static/css/font.css">
+  <link rel="stylesheet" href="../../static/css/weadmin.css">
+  <!-- 引入 ECharts 文件 -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@latest/dist/echarts.min.js"></script>
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <div class="weadmin-body">
+    <blockquote class="layui-elem-quote">
+      在激烈的市场竞争中，价格排名前二十的店铺无疑成为了消费者关注的焦点。这些店铺凭借其合理的定价策略、优质的商品或服务以及良好的口碑，在众多竞争者中脱颖而出。它们不仅吸引了大量的顾客，也树立了行业标杆，引领着市场的发展趋势。对于消费者而言，选择这些店铺意味着能够以更优惠的价格获得高品质的商品或服务，实现性价比的最优化。
+      同时，这也促使其他店铺不断调整经营策略，提升自身竞争力，共同推动整个行业的繁荣与发展。
+    </blockquote>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="main" style="width: 100%;height:400px;"></div>
+    <blockquote class="layui-elem-quote">
+
+    </blockquote>
+  </div>
+
+  <script>
+    $(function(){
+        $.ajax({
+            url:"http://127.0.0.1:9999/analyse/getPrice",
+            type:"get",
+            success:function(res){
+                console.log(res)
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('main'));
+                var x = []
+                var y = []
+                for(var i = 0; i < res.length; i++){
+                    x[i] = res[i][0].split(" ")[0]
+                    y[i] = parseFloat(res[i][1]) // 将价格转换为浮点数
+                }
+
+                // 指定图表的配置项和数据
+                var option = {
+                  title: {
+                    text: '商品价格排名前二十的店铺',
+                    left: 'center', // 居中显示标题
+                     textStyle: {
+                        color: '#333', // 标题字体颜色加深
+                        fontSize: 18, // 标题字体大小
+                        fontWeight: 'bold' // 标题字体加粗
+                     }
+                  },
+                  tooltip: {
+                    trigger: 'axis'
+                  },
+                  legend: {
+                    data: ['商品价格'],
+                    left: 'right', // 将图例靠右放置
+                    textStyle: {
+                      color: '#555' // 图例字体颜色加深
+                    }
+                  },
+                  grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                  },
+                  toolbox: {
+                    feature: {
+                      saveAsImage: {},
+                      backgroundColor: '#f5f5f5' // 网格背景色
+                    }
+                  },
+                  xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLabel: {
+                      rotate: 30, // 将标签旋转45度
+                      color: '#666' // 坐标轴标签字体颜色加深
+                    },
+                    data: x,
+                    axisLine: {
+                        lineStyle: {
+                           color: '#ccc' // 坐标轴线颜色加深
+                        }
+                    }
+                  },
+                  yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                           color: '#ccc' // 坐标轴线颜色加深
+                        }
+                    }
+                  },
+
+                  series: [
+                    {
+                      name: '商品价格',
+                      type: 'line',
+                      stack: '总量',
+                      data: y
+                    }
+                  ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            }
+        })
+    })
+  </script>
+</body>
+</html>

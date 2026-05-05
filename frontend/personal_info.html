@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人信息</title>
+
+  <!-- 引入一些外部样式库以增强页面美观 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f9;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    header {
+      background-color: #d9534f;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      color: #333;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+
+    .info-item strong {
+      color: #333;
+      font-size: 18px;
+    }
+
+    .info-item span {
+      font-size: 18px;
+    }
+
+    .info-item input {
+      padding: 5px 10px;
+      font-size: 16px;
+      width: 60%;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .info-item button {
+      padding: 5px 10px;
+      background-color: #0075c9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .info-item button:hover {
+      background-color: #005fa3;
+    }
+
+    .edit-box {
+      border: 1px solid #0075c9;
+      padding: 5px;
+      border-radius: 4px;
+      width: 80%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .edit-box button {
+      background-color: #28a745;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .edit-box button:hover {
+      background-color: #218838;
+    }
+
+    .edit-all-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .edit-all-btn:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <i class="fas fa-user-circle"></i> 个人信息
+  </header>
+
+  <div class="container">
+    <div class="section">
+      <h2>基本信息</h2>
+      <div class="info-item" id="name-item">
+        <strong>姓名：</strong>
+        <span id="name">未设置</span>
+      </div>
+      <div class="info-item" id="age-item">
+        <strong>年龄：</strong>
+        <span id="age">未设置</span>
+      </div>
+      <div class="info-item" id="job-item">
+        <strong>职业：</strong>
+        <span id="job">未设置</span>
+      </div>
+      <div class="info-item" id="email-item">
+        <strong>邮箱：</strong>
+        <span id="email">未设置</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>联系方式</h2>
+      <div class="info-item" id="phone-item">
+        <strong>电话：</strong>
+        <span id="phone">未设置</span>
+      </div>
+      <div class="info-item" id="address-item">
+        <strong>地址：</strong>
+        <span id="address">未设置</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>其他信息</h2>
+      <div class="info-item" id="hobbies-item">
+        <strong>兴趣爱好：</strong>
+        <span id="hobbies">未设置</span>
+      </div>
+      <div class="info-item" id="bio-item">
+        <strong>简介：</strong>
+        <span id="bio">未设置</span>
+      </div>
+    </div>
+
+    <!-- 编辑和保存按钮 -->
+    <button class="edit-all-btn" onclick="editAllInfo()">编辑所有信息</button>
+    <button class="edit-all-btn" onclick="saveAllInfo()">保存所有信息</button>
+  </div>
+
+  <script>
+    // 从 localStorage 获取个人信息并显示
+    function displayPersonalInfo() {
+      document.getElementById('name').textContent = localStorage.getItem('name') || '未设置';
+      document.getElementById('age').textContent = localStorage.getItem('age') || '未设置';
+      document.getElementById('job').textContent = localStorage.getItem('job') || '未设置';
+      document.getElementById('email').textContent = localStorage.getItem('email') || '未设置';
+      document.getElementById('phone').textContent = localStorage.getItem('phone') || '未设置';
+      document.getElementById('address').textContent = localStorage.getItem('address') || '未设置';
+      document.getElementById('hobbies').textContent = localStorage.getItem('hobbies') || '未设置';
+      document.getElementById('bio').textContent = localStorage.getItem('bio') || '未设置';
+    }
+
+    // 页面加载时显示个人信息
+    window.onload = displayPersonalInfo;
+
+    // 启动编辑模式，所有信息项都变为可编辑框
+    function editAllInfo() {
+      const fields = ['name', 'age', 'job', 'email', 'phone', 'address', 'hobbies', 'bio'];
+      fields.forEach(field => {
+        const spanElement = document.getElementById(field);
+        const currentValue = spanElement.textContent;
+
+        // 创建编辑框
+        const editBox = document.createElement('div');
+        editBox.className = 'edit-box';
+
+        // 添加输入框
+        editBox.innerHTML = `
+          <input type="text" id="${field}-input" value="${currentValue}" />
+        `;
+
+        // 替换原始显示内容
+        spanElement.style.display = 'none';
+        spanElement.parentElement.appendChild(editBox);
+      });
+    }
+
+    // 保存所有修改的信息并更新显示
+    function saveAllInfo() {
+      const fields = ['name', 'age', 'job', 'email', 'phone', 'address', 'hobbies', 'bio'];
+      fields.forEach(field => {
+        const inputElement = document.getElementById(`${field}-input`);
+        const spanElement = document.getElementById(field);
+        const editBox = inputElement.parentElement;
+
+        // 保存修改的值到 localStorage
+        const newValue = inputElement.value;
+        localStorage.setItem(field, newValue);
+
+        // 更新页面显示
+        spanElement.textContent = newValue;
+
+        // 隐藏编辑框
+        editBox.remove();
+        spanElement.style.display = 'inline';
+      });
+    }
+  </script>
+
+</body>
+</html>

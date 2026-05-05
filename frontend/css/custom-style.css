@@ -1,0 +1,1507 @@
+/* ==================== 科技感金属风格主题 ==================== */
+/* 京东电商数据分析系统 - 赛博朋克风格 */
+
+/* 科技感配色方案 */
+:root {
+    /* 清新科技风配色 - 青绿 */
+    --neon-primary: #00ff88;
+    --neon-secondary: #00f3ff;
+    --neon-accent: #00ccff;
+    --neon-dark: #008866;
+    --neon-light: #88ffcc;
+
+    /* 兼容性变量 */
+    --neon-blue: #00f3ff;
+    --neon-purple: #00ff88;
+    --neon-green: #00ff88;
+    --neon-pink: #ff006e;
+    --neon-orange: #ff6b00;
+
+    /* 金属渐变 */
+    --metal-dark: linear-gradient(135deg, #0d0d12 0%, #1a1a2e 50%, #16213e 100%);
+    --metal-panel: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+    --metal-chrome: linear-gradient(180deg, #3a3a4a 0%, #1a1a2e 50%, #3a3a4a 100%);
+    --metal-steel: linear-gradient(180deg, #4a5568 0%, #2d3748 50%, #4a5568 100%);
+    --metal-gold: linear-gradient(135deg, #ffd700 0%, #b8860b 50%, #ffd700 100%);
+    --metal-bronze: linear-gradient(135deg, #cd7f32 0%, #8b4513 50%, #cd7f32 100%);
+
+    /* 背景色 - 提高亮度增强金属质感对比 */
+    --bg-dark: #0a0a10;
+    --bg-primary: #12121a;
+    --bg-secondary: #1a1a25;
+    --bg-card: rgba(30, 30, 45, 0.95);
+    --bg-card-hover: rgba(40, 40, 60, 0.98);
+
+    /* 发光效果 */
+    --glow-blue: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3), 0 0 40px rgba(0, 243, 255, 0.1);
+    --glow-purple: 0 0 10px rgba(0, 255, 136, 0.5), 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+    --glow-pink: 0 0 10px rgba(255, 0, 110, 0.5), 0 0 20px rgba(255, 0, 110, 0.3);
+    --glow-green: 0 0 10px rgba(0, 255, 136, 0.5), 0 0 20px rgba(0, 255, 136, 0.3);
+    --glow-orange: 0 0 10px rgba(255, 107, 0, 0.5), 0 0 20px rgba(255, 107, 0, 0.3);
+
+    /* 阴影 */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow-blue: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    --shadow-glow-purple: 0 0 20px rgba(0, 255, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+    /* 边框 */
+    --border-tech: 1px solid rgba(0, 243, 255, 0.2);
+    --border-glow: 1px solid rgba(0, 243, 255, 0.4);
+    --border-metal: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* 圆角 */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 20px;
+
+    /* 过渡动画 */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== 全局样式 ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: var(--bg-dark);
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 科技网格背景 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    animation: gridMove 30s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(40px, 40px); }
+}
+
+/* 扫描线效果 */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 255, 136, 0.015) 50%, transparent 100%);
+    background-size: 100% 3px;
+    pointer-events: none;
+    z-index: 1;
+    animation: scanline 10s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--neon-primary), var(--neon-secondary));
+    border-radius: 4px;
+    transition: var(--transition-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--neon-secondary), var(--neon-accent));
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+/* 选中文本 */
+::selection {
+    background: rgba(0, 243, 255, 0.3);
+    color: #fff;
+}
+
+/* ==================== 顶部导航栏 - 金属质感 ==================== */
+.container {
+    background: linear-gradient(180deg, #1a1a2e 0%, #0d0d12 100%);
+    border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 255, 136, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    height: 60px;
+    position: relative;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.container::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-secondary), var(--neon-primary), var(--neon-secondary), transparent);
+    animation: borderGlow 3s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.container .logo a {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    line-height: 60px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5), 0 0 20px rgba(0, 255, 136, 0.3);
+    transition: var(--transition-base);
+    background: linear-gradient(90deg, var(--neon-secondary), var(--neon-primary), var(--neon-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.container .logo a:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 255, 136, 0.4);
+}
+
+/* Logo 图标 */
+.container img {
+    filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
+    transition: var(--transition-slow);
+}
+
+.container img:hover {
+    transform: rotate(360deg) scale(1.1);
+    filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.8));
+}
+
+/* 导航菜单 */
+.layui-nav .layui-nav-item a {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    letter-spacing: 1px;
+    transition: var(--transition-base);
+    position: relative;
+}
+
+.layui-nav .layui-nav-item a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    transform: translateX(-50%);
+    transition: var(--transition-base);
+    box-shadow: 0 0 10px var(--neon-blue);
+}
+
+.layui-nav .layui-nav-item:hover a::before {
+    width: 80%;
+}
+
+.layui-nav .layui-nav-item:hover {
+    background: rgba(0, 243, 255, 0.1);
+    box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
+.layui-nav .layui-nav-item:hover a {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+/* 下拉菜单 - 金属实体质感 */
+.layui-nav-child {
+    background: linear-gradient(180deg, rgba(30, 30, 45, 0.98) 0%, rgba(25, 25, 40, 0.98) 100%);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(20px);
+    animation: menuSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    /* 实体立体感 */
+    box-shadow:
+        5px 5px 15px rgba(0, 0, 0, 0.5),
+        -1px -1px 5px rgba(255, 255, 255, 0.05),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.25),
+        inset -1px -1px 3px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 243, 255, 0.2) !important;
+}
+
+/* 下拉菜单顶部光泽 */
+.layui-nav-child::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff88, #00ccff, transparent);
+    opacity: 0.8;
+}
+
+@keyframes menuSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scaleY(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+
+.layui-nav-child dd {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: var(--transition-fast);
+}
+
+.layui-nav-child dd:last-child {
+    border-bottom: none;
+}
+
+.layui-nav-child dd:hover {
+    background: linear-gradient(90deg, rgba(0, 243, 255, 0.15) 0%, rgba(0, 255, 136, 0.1) 100%);
+    box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
+.layui-nav-child dd:hover a {
+    color: var(--neon-blue);
+    padding-left: 25px !important;
+}
+
+.layui-nav-child dd a {
+    color: rgba(255, 255, 255, 0.7);
+    transition: var(--transition-base);
+}
+
+/* 下拉箭头 */
+.layui-nav-more {
+    transition: var(--transition-base);
+}
+
+.layui-nav-itemed > a .layui-nav-more {
+    transform: rotate(180deg);
+}
+
+/* ==================== 侧边栏 - 金属面板风格 ==================== */
+.left-nav {
+    background: var(--metal-dark);
+    border-right: var(--border-glow);
+    box-shadow: 4px 0 30px rgba(0, 243, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.left-nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+    box-shadow: 0 0 20px var(--neon-blue);
+}
+
+#side-nav {
+    background: transparent;
+}
+
+/* 侧边栏导航 */
+.left-nav .layui-nav {
+    background: transparent !important;
+}
+
+.left-nav .layui-nav-item {
+    margin: 6px 10px;
+    border-radius: var(--radius-md);
+    border: var(--border-metal);
+    overflow: hidden;
+    transition: var(--transition-base);
+    position: relative;
+}
+
+.left-nav .layui-nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple));
+    opacity: 0;
+    transition: var(--transition-base);
+}
+
+.left-nav .layui-nav-item:hover::before {
+    opacity: 1;
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
+.left-nav .layui-nav-item > a {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    padding: 12px 20px !important;
+    transition: var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.left-nav .layui-nav-item > a i {
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    transition: var(--transition-base);
+}
+
+.left-nav .layui-nav-item:hover {
+    background: rgba(0, 243, 255, 0.08);
+    transform: translateX(5px);
+    box-shadow: -3px 0 20px rgba(0, 243, 255, 0.2);
+    border-color: rgba(0, 243, 255, 0.3);
+}
+
+.left-nav .layui-nav-item:hover > a i {
+    transform: scale(1.2) rotate(10deg);
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.8);
+}
+
+/* 侧边栏下拉菜单 */
+.left-nav .layui-nav-child {
+    background: rgba(10, 10, 18, 0.95) !important;
+    margin-top: 5px;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.left-nav .layui-nav-child dd a {
+    color: rgba(255, 255, 255, 0.6) !important;
+    padding: 10px 20px 10px 35px !important;
+    text-align: left;
+}
+
+.left-nav .layui-nav-child dd:hover a {
+    color: var(--neon-green) !important;
+    padding-left: 45px !important;
+}
+
+/* ==================== 标签页 - 科技控制台风格 ==================== */
+.page-content {
+    background: var(--bg-primary);
+}
+
+.page-content .layui-tab-title {
+    background: linear-gradient(180deg, rgba(15, 15, 25, 0.95) 0%, rgba(10, 10, 18, 0.95) 100%);
+    border-bottom: var(--border-glow);
+    backdrop-filter: blur(10px);
+}
+
+.page-content .layui-tab-title li {
+    margin: 0 2px;
+    padding: 0 25px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    transition: var(--transition-base);
+    color: rgba(255, 255, 255, 0.6);
+    border: var(--border-metal);
+    border-bottom: none;
+    position: relative;
+}
+
+.page-content .layui-tab-title li::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    opacity: 0;
+    transition: var(--transition-base);
+}
+
+.page-content .layui-tab-title li:hover {
+    background: rgba(0, 243, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 -5px 20px rgba(0, 243, 255, 0.1);
+}
+
+.page-content .layui-tab-title li:hover::before {
+    opacity: 1;
+}
+
+.page-content .layui-tab-title .layui-this {
+    background: linear-gradient(180deg, rgba(0, 243, 255, 0.15) 0%, rgba(0, 255, 136, 0.1) 100%);
+    color: #fff !important;
+    border: var(--border-glow);
+    border-bottom: none;
+    box-shadow: 0 -5px 30px rgba(0, 243, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.page-content .layui-tab-title .layui-this::after {
+    display: none;
+}
+
+.page-content .layui-tab-title .layui-this::before {
+    opacity: 1;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
+/* 关闭按钮 */
+.layui-tab-close {
+    width: 20px;
+    height: 20px;
+    line-height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.5);
+    transition: var(--transition-fast);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.layui-tab-close:hover {
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange));
+    color: #fff;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);
+    border-color: transparent;
+}
+
+/* 标签页内容 */
+.page-content .layui-tab-content {
+    background: var(--bg-primary);
+}
+
+.layui-tab-item {
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ==================== 首页欢迎区域 ==================== */
+#tab-home {
+    background: radial-gradient(ellipse at center, rgba(0, 243, 255, 0.1) 0%, transparent 70%),
+                linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-dark) 100%);
+    min-height: calc(100vh - 130px);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 中心装饰环 */
+#tab-home::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    border: 2px solid rgba(0, 243, 255, 0.1);
+    border-radius: 50%;
+    animation: pulse 4s ease-in-out infinite;
+}
+
+#tab-home::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    border-radius: 50%;
+    animation: pulse 4s ease-in-out infinite 2s;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+}
+
+#tab-home h2 {
+    font-size: 42px !important;
+    font-weight: 800;
+    color: #fff !important;
+    text-align: center;
+    margin-bottom: 20px !important;
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.5), 0 0 40px rgba(0, 255, 136, 0.3);
+    letter-spacing: 5px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+}
+
+#tab-home p {
+    font-size: 18px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-align: center;
+    margin-bottom: 50px !important;
+    letter-spacing: 2px;
+}
+
+/* 首页卡片 - 金属面板风格 */
+.home-card {
+    background: var(--metal-panel) !important;
+    padding: 35px 25px !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-metal), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    border: var(--border-metal) !important;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer !important;
+    transition: var(--transition-slow) !important;
+}
+
+.home-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    transition: var(--transition-base);
+}
+
+.home-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(0, 243, 255, 0.05), transparent);
+    transform: rotate(45deg);
+    transition: var(--transition-slow);
+    opacity: 0;
+}
+
+.home-card:hover::before {
+    height: 100%;
+    opacity: 0.1;
+}
+
+.home-card:hover::after {
+    opacity: 1;
+}
+
+.home-card:hover {
+    transform: translateY(-15px) scale(1.02) !important;
+    box-shadow: 0 20px 50px rgba(0, 243, 255, 0.2), 0 0 30px rgba(0, 243, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(0, 243, 255, 0.3) !important;
+}
+
+.home-card i {
+    font-size: 56px !important;
+    transition: var(--transition-slow) !important;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
+}
+
+.home-card:hover i {
+    transform: scale(1.2) rotate(10deg) !important;
+    filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.8)) !important;
+}
+
+.home-card h3 {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    margin: 20px 0 10px 0 !important;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+}
+
+.home-card p {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+    letter-spacing: 1px;
+}
+
+/* 统计卡片 */
+.stat-card {
+    background: var(--metal-chrome) !important;
+    padding: 30px 20px !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-metal), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    border: var(--border-metal) !important;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-slow) !important;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-green), var(--neon-blue));
+    background-size: 200% 100%;
+    animation: gradientMove 3s ease-in-out infinite;
+}
+
+@keyframes gradientMove {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.stat-card:hover {
+    transform: translateY(-15px) scale(1.03) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 243, 255, 0.15) !important;
+    border-color: rgba(0, 243, 255, 0.3) !important;
+}
+
+.stat-card i {
+    font-size: 48px !important;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.5));
+    transition: var(--transition-slow);
+}
+
+.stat-card:hover i {
+    transform: scale(1.25) rotate(-10deg);
+    filter: drop-shadow(0 0 25px rgba(0, 243, 255, 0.8));
+}
+
+.stat-card h4 {
+    font-size: 15px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin: 15px 0 8px 0 !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.stat-card p {
+    font-size: 36px !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+    transition: var(--transition-base);
+}
+
+.stat-card:hover p {
+    transform: scale(1.05);
+}
+
+/* 数据统计标题 */
+.page-content h3 {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 600 !important;
+    letter-spacing: 3px !important;
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.3) !important;
+}
+
+/* ==================== 按钮 - 金属实体质感风格 ==================== */
+.layui-btn {
+    border-radius: var(--radius-md) !important;
+    padding: 12px 30px !important;
+    font-size: 14px !important;
+    letter-spacing: 1px !important;
+    transition: var(--transition-base) !important;
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    /* 金属质感：左上高光，右下阴影 */
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.4),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+        2px 2px 5px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 按钮光泽层 */
+.layui-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    pointer-events: none;
+}
+
+/* 按钮悬停光泽流动 */
+.layui-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: var(--transition-slow);
+}
+
+.layui-btn:hover::after {
+    left: 100%;
+}
+
+/* 按钮按下效果 - 凹陷感 */
+.layui-btn:active {
+    box-shadow:
+        inset -1px -1px 2px rgba(255, 255, 255, 0.3),
+        inset 1px 1px 2px rgba(0, 0, 0, 0.5),
+        1px 1px 2px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(1px);
+}
+
+/* 主按钮 - 青绿金属 */
+.layui-btn-normal {
+    background: linear-gradient(135deg, #00f3ff 0%, #00ccff 50%, #0099cc 100%) !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(0, 243, 255, 0.5) !important;
+}
+
+.layui-btn-normal:hover {
+    background: linear-gradient(135deg, #00ffff 0%, #00f3ff 50%, #00bbee 100%) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 243, 255, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-2px);
+}
+
+/* 边框按钮 - 金属边框 */
+.layui-btn-primary {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.1) 0%, rgba(0, 204, 255, 0.05) 100%) !important;
+    border: 2px solid rgba(0, 243, 255, 0.4) !important;
+    color: #00f3ff !important;
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.3) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.25),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+        0 0 15px rgba(0, 243, 255, 0.1) !important;
+}
+
+.layui-btn-primary:hover {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.25) 0%, rgba(0, 204, 255, 0.15) 100%) !important;
+    color: #fff !important;
+    border-color: rgba(0, 243, 255, 0.6) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(0, 243, 255, 0.3),
+        0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+/* 暖色按钮 - 金色金属 */
+.layui-btn-warm {
+    background: linear-gradient(135deg, #ffdd00 0%, #ffaa00 50%, #cc8800 100%) !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(255, 187, 0, 0.5) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.4),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.4),
+        2px 2px 5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.layui-btn-warm:hover {
+    background: linear-gradient(135deg, #ffee00 0%, #ffbb00 50%, #dd9900 100%) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(255, 187, 0, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+/* 禁用按钮 - 灰色金属 */
+.layui-btn-disabled {
+    background: linear-gradient(135deg, #3a3a4a 0%, #2a2a3a 50%, #1a1a2a 100%) !important;
+    color: #666 !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.25),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.4) !important;
+    cursor: not-allowed !important;
+}
+
+/* 绿色按钮 - 翠绿金属 */
+.layui-btn-green {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc66 50%, #009944 100%) !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(0, 255, 136, 0.5) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.4),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.4),
+        2px 2px 5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.layui-btn-green:hover {
+    background: linear-gradient(135deg, #00ff99 0%, #00dd77 50%, #00aa55 100%) !important;
+    box-shadow:
+        inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 255, 136, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+/* ==================== 表单输入框 ==================== */
+.layui-input, .layui-select, .layui-textarea {
+    background: rgba(15, 15, 25, 0.8) !important;
+    border: var(--border-metal) !important;
+    border-radius: var(--radius-md) !important;
+    color: #fff !important;
+    padding: 12px 18px !important;
+    transition: var(--transition-base) !important;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.layui-input:hover, .layui-select:hover, .layui-textarea:hover {
+    border-color: rgba(0, 243, 255, 0.3) !important;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
+.layui-input:focus, .layui-select:focus, .layui-textarea:focus {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    background: rgba(10, 10, 18, 0.9) !important;
+}
+
+.layui-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* 下拉选择框箭头 */
+.layui-form-select dl {
+    background: rgba(20, 20, 35, 0.98) !important;
+    border: var(--border-glow) !important;
+    box-shadow: var(--glow-blue) !important;
+}
+
+.layui-form-select dl dd {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.layui-form-select dl dd:hover {
+    background: rgba(0, 243, 255, 0.1) !important;
+    color: var(--neon-blue) !important;
+}
+
+.layui-form-select dl dd.layui-this {
+    background: linear-gradient(90deg, rgba(0, 243, 255, 0.2), rgba(0, 255, 136, 0.1)) !important;
+    color: var(--neon-blue) !important;
+}
+
+/* ==================== 卡片组件 ==================== */
+.layui-card {
+    background: var(--metal-panel) !important;
+    border-radius: var(--radius-lg) !important;
+    border: var(--border-metal) !important;
+    box-shadow: var(--shadow-metal) !important;
+    transition: var(--transition-base) !important;
+}
+
+.layui-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 243, 255, 0.1) !important;
+    border-color: rgba(0, 243, 255, 0.2) !important;
+}
+
+.layui-card-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%) !important;
+    border-bottom: var(--border-metal) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+}
+
+.layui-card-body {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ==================== 表格 - 金属数据面板 ==================== */
+.layui-table {
+    background: linear-gradient(145deg, rgba(25, 25, 40, 0.8) 0%, rgba(15, 15, 25, 0.9) 100%) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(0, 243, 255, 0.15) !important;
+    /* 实体立体感 */
+    box-shadow:
+        4px 4px 12px rgba(0, 0, 0, 0.4),
+        -1px -1px 4px rgba(255, 255, 255, 0.03),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+        inset -1px -1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* 表头金属质感 */
+.layui-table th {
+    background: linear-gradient(180deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 204, 255, 0.15) 50%, rgba(0, 150, 200, 0.1) 100%) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    border: 1px solid rgba(0, 243, 255, 0.2) !important;
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+    /* 顶部光泽 */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.layui-table td {
+    border: 1px solid rgba(0, 243, 255, 0.1) !important;
+    transition: var(--transition-fast);
+}
+
+.layui-table tbody tr:hover td {
+    background: rgba(0, 243, 255, 0.1) !important;
+    box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.15);
+    color: #fff !important;
+}
+
+/* 表格视图容器 */
+.layui-table-view {
+    background: linear-gradient(145deg, rgba(30, 30, 45, 0.95) 0%, rgba(25, 25, 40, 0.98) 100%) !important;
+    border: 1px solid rgba(0, 243, 255, 0.2) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
+    /* 实体立体感 */
+    box-shadow:
+        6px 6px 20px rgba(0, 0, 0, 0.5),
+        -2px -2px 8px rgba(255, 255, 255, 0.05),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.25),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* 表格隔行变色 */
+.layui-table tbody tr:nth-child(even) {
+    background: rgba(0, 243, 255, 0.03) !important;
+}
+
+.layui-table tbody tr:nth-child(odd) {
+    background: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ==================== 分页 - 金属质感 ==================== */
+.layui-laypage a, .layui-laypage span {
+    background: linear-gradient(145deg, rgba(35, 35, 50, 0.9) 0%, rgba(20, 20, 35, 0.95) 100%) !important;
+    border: 1px solid rgba(0, 243, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: var(--transition-fast);
+    /* 实体立体感 */
+    box-shadow:
+        2px 2px 6px rgba(0, 0, 0, 0.4),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+.layui-laypage a:hover {
+    background: linear-gradient(145deg, #00ff88 0%, #00ccff 100%) !important;
+    color: #000 !important;
+    border-color: rgba(0, 255, 136, 0.5) !important;
+    box-shadow:
+        0 0 15px rgba(0, 255, 136, 0.4),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background: linear-gradient(145deg, #00ff88 0%, #00ccff 100%) !important;
+    color: #000 !important;
+    border-radius: var(--radius-sm);
+    box-shadow:
+        0 0 15px rgba(0, 255, 136, 0.5),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.4),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ==================== 弹窗 - 金属质感 ==================== */
+body .layui-layer,
+html body .layui-layer {
+    background: linear-gradient(145deg, rgba(20, 20, 35, 0.98) 0%, rgba(15, 15, 25, 0.98) 100%) !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid rgba(0, 243, 255, 0.4) !important;
+    overflow: hidden;
+    /* 实体立体感 */
+    box-shadow:
+        10px 10px 30px rgba(0, 0, 0, 0.6),
+        -2px -2px 10px rgba(255, 255, 255, 0.05),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.25),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(0, 243, 255, 0.2) !important;
+}
+
+/* 弹窗顶部金属光泽条 */
+.layui-layer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00ff88, #00ccff, #00f3ff);
+    z-index: 1;
+}
+
+.layui-layer-title {
+    background: linear-gradient(180deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 204, 255, 0.1) 100%) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.2) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.layui-layer-dialog {
+    background: linear-gradient(145deg, rgba(30, 30, 45, 0.98) 0%, rgba(25, 25, 40, 0.98) 100%) !important;
+}
+
+/* ==================== Prompt/Page 弹窗 - 科技感 (高特异性) ==================== */
+body .layui-layer-page,
+body .layui-layer-prompt,
+html body .layui-layer-page,
+html body .layui-layer-prompt {
+    background: linear-gradient(145deg, rgba(20, 20, 35, 0.98) 0%, rgba(15, 15, 25, 0.98) 100%) !important;
+    border: 1px solid rgba(0, 243, 255, 0.4) !important;
+    border-radius: 12px !important;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(0, 243, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 弹窗标题 */
+body .layui-layer-page .layui-layer-title,
+body .layui-layer-prompt .layui-layer-title,
+html body .layui-layer-page .layui-layer-title,
+html body .layui-layer-prompt .layui-layer-title {
+    background: linear-gradient(180deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 204, 255, 0.1) 100%) !important;
+    color: #00f3ff !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.3) !important;
+    padding: 15px 20px !important;
+    font-size: 16px !important;
+}
+
+/* 弹窗内容区 */
+body .layui-layer-page .layui-layer-content,
+body .layui-layer-prompt .layui-layer-content,
+html body .layui-layer-page .layui-layer-content,
+html body .layui-layer-prompt .layui-layer-content {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 20px !important;
+}
+
+/* Prompt 输入框样式 */
+body .layui-layer-input,
+html body .layui-layer-input,
+.layui-layer-prompt .layui-layer-input {
+    background: rgba(10, 10, 18, 0.9) !important;
+    border: 1px solid rgba(0, 243, 255, 0.4) !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.3s ease !important;
+}
+
+body .layui-layer-input:focus,
+html body .layui-layer-input:focus {
+    outline: none !important;
+    border-color: #00f3ff !important;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+body .layui-layer-input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 弹窗按钮区域 */
+body .layui-layer-btn,
+html body .layui-layer-btn {
+    background: transparent !important;
+    border-top: 1px solid rgba(0, 243, 255, 0.15) !important;
+    padding: 15px 20px !important;
+}
+
+/* 确定按钮 */
+body .layui-layer-btn .layui-layer-btn0,
+html body .layui-layer-btn .layui-layer-btn0 {
+    background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%) !important;
+    color: #000 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4) !important;
+    transition: all 0.3s ease !important;
+    height: auto !important;
+    line-height: normal !important;
+}
+
+body .layui-layer-btn .layui-layer-btn0:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5) !important;
+    background: linear-gradient(135deg, #00ffaa 0%, #00ddff 100%) !important;
+}
+
+/* 取消按钮 */
+body .layui-layer-btn .layui-layer-btn1,
+html body .layui-layer-btn .layui-layer-btn1 {
+    background: rgba(0, 243, 255, 0.1) !important;
+    color: #00f3ff !important;
+    border: 1px solid rgba(0, 243, 255, 0.4) !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    height: auto !important;
+    line-height: normal !important;
+}
+
+body .layui-layer-btn .layui-layer-btn1:hover {
+    background: rgba(0, 243, 255, 0.2) !important;
+    border-color: #00f3ff !important;
+    color: #fff !important;
+}
+
+/* 关闭按钮 */
+body .layui-layer-setwin .layui-layer-close,
+html body .layui-layer-setwin .layui-layer-close {
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: all 0.3s ease !important;
+}
+
+.layui-layer-setwin .layui-layer-close:hover {
+    color: #ff4444 !important;
+    transform: rotate(90deg) !important;
+}
+
+.layui-layer-content {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ==================== 加载动画 ==================== */
+.layui-icon-loading {
+    color: var(--neon-blue) !important;
+    filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
+}
+
+.layui-icon-loading i {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== 徽章 ==================== */
+.layui-badge {
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange)) !important;
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
+}
+
+.layui-badge-dot {
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.6);
+}
+
+/* ==================== 开关 ==================== */
+.layui-form-switch {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: var(--border-metal) !important;
+}
+
+.layui-form-switch i {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)) !important;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.layui-form-onswitch {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)) !important;
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+}
+
+/* ==================== 复选框 ==================== */
+.layui-form-checkbox {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: var(--border-metal) !important;
+}
+
+.layui-form-checkbox:hover {
+    border-color: var(--neon-blue) !important;
+}
+
+.layui-form-checkbox.layui-form-checkboxed {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)) !important;
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+}
+
+/* ==================== 底部 ==================== */
+.footer {
+    background: var(--metal-dark) !important;
+    border-top: var(--border-glow) !important;
+    box-shadow: 0 -4px 30px rgba(0, 243, 255, 0.1) !important;
+}
+
+.footer .copyright {
+    color: rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 1px !important;
+}
+
+/* ==================== 工具类 ==================== */
+.tech-border {
+    border: var(--border-glow);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.02);
+}
+
+.tech-glow-blue {
+    box-shadow: var(--glow-blue);
+}
+
+.tech-glow-purple {
+    box-shadow: var(--glow-purple);
+}
+
+.tech-glow-green {
+    box-shadow: var(--glow-green);
+}
+
+.text-neon-blue { color: var(--neon-blue); text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+.text-neon-purple { color: var(--neon-purple); text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+.text-neon-pink { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255, 0, 110, 0.5); }
+.text-neon-green { color: var(--neon-green); text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+
+/* 金属质感文字 */
+.text-metal {
+    background: linear-gradient(180deg, #e8e8e8 0%, #a0a0a0 50%, #e8e8e8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+/* 霓虹文字效果 */
+.text-neon {
+    animation: neonFlicker 2s ease-in-out infinite;
+}
+
+@keyframes neonFlicker {
+    0%, 100% { opacity: 1; filter: brightness(1); }
+    50% { opacity: 0.95; filter: brightness(1.2); }
+    52% { opacity: 0.8; filter: brightness(0.8); }
+    54% { opacity: 1; filter: brightness(1.1); }
+}
+
+/* 卡片悬浮发光效果 */
+.hover-glow {
+    transition: var(--transition-base);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* 金属边框装饰 */
+.metal-frame {
+    position: relative;
+    padding: 20px;
+    border: 2px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius-lg);
+}
+
+.metal-frame::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 20px;
+    height: 20px;
+    border-top: 3px solid var(--neon-blue);
+    border-left: 3px solid var(--neon-blue);
+    border-radius: var(--radius-sm) 0 0 0;
+}
+
+.metal-frame::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-top: 3px solid var(--neon-blue);
+    border-right: 3px solid var(--neon-blue);
+    border-radius: 0 var(--radius-sm) 0 0;
+}
+
+/* ==================== 响应式优化 ==================== */
+@media screen and (max-width: 768px) {
+    .container {
+        height: 50px;
+    }
+
+    .container .logo a {
+        font-size: 16px;
+        line-height: 50px;
+    }
+
+    .home-card {
+        max-width: 100% !important;
+    }
+
+    .stat-card {
+        max-width: 100% !important;
+    }
+
+    #tab-home h2 {
+        font-size: 28px !important;
+    }
+
+    #tab-home p {
+        font-size: 14px !important;
+    }
+}
+
+/* ==================== 登录页面专用样式 ==================== */
+.login-bg {
+    background: var(--bg-dark);
+    position: relative;
+}
+
+.login-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(0, 243, 255, 0.15) 0%, transparent 70%);
+    animation: pulseBg 5s ease-in-out infinite;
+}
+
+@keyframes pulseBg {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+.login {
+    background: rgba(15, 15, 25, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border: var(--border-glow) !important;
+    box-shadow: var(--glow-blue), 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    position: relative;
+    z-index: 10;
+}
+
+.login::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+    background-size: 200% 100%;
+    animation: gradientMove 3s ease-in-out infinite;
+}
+
+/* 登录页标题 - 使用高优先级选择器 */
+.login > .message,
+.login .message,
+body .login .message {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-fill-color: #ffffff !important;
+    background: transparent !important;
+    background-clip: unset !important;
+    -webkit-background-clip: unset !important;
+    text-shadow:
+        0 0 10px rgba(0, 243, 255, 0.8),
+        0 0 20px rgba(0, 243, 255, 0.6),
+        0 0 30px rgba(0, 255, 136, 0.4) !important;
+    animation: titleGlow 3s ease-in-out infinite;
+    opacity: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* ==================== 提示消息增强 ==================== */
+.layui-layer-notify .layui-layer-content {
+    background: rgba(25, 25, 40, 0.98) !important;
+    border: var(--border-glow) !important;
+    color: #fff !important;
+}
+
+/* 成功提示 */
+.layui-layer-notify-success .layui-layer-content {
+    border-color: var(--neon-green) !important;
+    box-shadow: var(--glow-green) !important;
+}
+
+/* 错误提示 */
+.layui-layer-notify-error .layui-layer-content {
+    border-color: var(--neon-pink) !important;
+    box-shadow: var(--glow-pink) !important;
+}
+
+/* 警告提示 */
+.layui-layer-notify-warning .layui-layer-content {
+    border-color: var(--neon-yellow) !important;
+    box-shadow: 0 0 20px rgba(255, 238, 0, 0.3) !important;
+}

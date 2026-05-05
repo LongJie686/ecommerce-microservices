@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史记录 - 电商数据分析系统</title>
+
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #00f3ff;
+            --accent: #00ccff;
+            --dark-bg: #0a0f14;
+            --panel-bg: rgba(16, 24, 32, 0.95);
+            --glass-bg: rgba(20, 30, 40, 0.8);
+            --border-glow: rgba(0, 243, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --card-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 30px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .aurora-bg::before,
+        .aurora-bg::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at center,
+                rgba(0, 255, 136, 0.1) 0%,
+                rgba(0, 243, 255, 0.08) 25%,
+                transparent 70%);
+            animation: aurora-move 20s ease-in-out infinite;
+            filter: blur(60px);
+        }
+
+        .aurora-bg::after {
+            background: radial-gradient(ellipse at center,
+                rgba(0, 243, 255, 0.08) 0%,
+                rgba(100, 0, 255, 0.05) 30%,
+                transparent 80%);
+            animation: aurora-move-2 25s ease-in-out infinite;
+            animation-delay: -5s;
+        }
+
+        @keyframes aurora-move {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.6; }
+            50% { transform: translate(5%, 5%) rotate(5deg) scale(1.1); opacity: 0.8; }
+        }
+
+        @keyframes aurora-move-2 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.5; }
+            50% { transform: translate(-5%, 3%) rotate(-5deg) scale(1.15); opacity: 0.7; }
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--secondary);
+            transform: translateX(-3px);
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title i {
+            color: var(--secondary);
+            -webkit-text-fill-color: var(--secondary);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .table-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .table-title i {
+            color: var(--secondary);
+        }
+
+        .data-table-wrapper {
+            overflow-x: auto;
+            max-height: calc(100vh - 250px);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 204, 255, 0.1) 100%);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.08);
+            color: var(--text-secondary);
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .row-number {
+            color: var(--text-muted);
+            font-size: 12px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .price-cell {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .shop-cell, .name-cell {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="aurora-bg"></div>
+
+    <a href="/index" class="back-btn" target="_parent">
+        <i class="fas fa-arrow-left"></i>
+        <span>返回首页</span>
+    </a>
+
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-history"></i>
+            <span>历史记录</span>
+        </h1>
+        <p class="page-subtitle">查看历史数据记录</p>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <div class="table-title">
+                <i class="fas fa-database"></i>
+                <span>MySQL 数据</span>
+            </div>
+        </div>
+
+        {% if rows and rows | length > 0 %}
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="row-number">#</th>
+                        <th><i class="fas fa-tag"></i>商品名称</th>
+                        <th><i class="fas fa-yen-sign"></i>价格</th>
+                        <th><i class="fas fa-store"></i>店铺</th>
+                        <th><i class="fas fa-comment"></i>评论数</th>
+                        <th><i class="fas fa-gift"></i>促销</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td class="row-number">{{ loop.index }}</td>
+                        <td class="name-cell" title="{{ row[0] }}">{{ row[0] }}</td>
+                        <td class="price-cell">¥{{ row[1] }}</td>
+                        <td class="shop-cell" title="{{ row[2] }}">{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] | default('-') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>暂无历史数据</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
