@@ -1,13 +1,12 @@
 """Recommend service - handles recommendation algorithms and AB testing."""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from shared.tracing import TracingMiddleware
 from shared.database import DatabaseManager
 from shared.cache import RedisClient
 from app.config import settings
 from app.routers import recommend as recommend_router
-
-app = FastAPI(title=settings.service_name, version="1.0.0")
-app.add_middleware(TracingMiddleware)
 
 db = DatabaseManager(
     write_url=settings.database_url,
@@ -16,16 +15,17 @@ db = DatabaseManager(
 redis = RedisClient(url=settings.redis_url)
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     from app.models.recommend import UserBehavior, Recommendation, ABTestConfig  # noqa: F401
     db.init_tables()
     await redis.connect()
-
-
-@app.on_event("shutdown")
-async def shutdown():
+    yield
     await redis.close()
+
+
+app = FastAPI(title=settings.service_name, version="1.0.0", lifespan=lifespan)
+app.add_middleware(TracingMiddleware)
 
 
 @app.get("/health")

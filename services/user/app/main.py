@@ -1,12 +1,11 @@
 """User service - handles user registration, login, and profiles."""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from shared.tracing import TracingMiddleware
 from shared.database import DatabaseManager
 from app.config import settings
 from app.routers import user as user_router
-
-app = FastAPI(title=settings.service_name, version="1.0.0")
-app.add_middleware(TracingMiddleware)
 
 db = DatabaseManager(
     write_url=settings.database_url,
@@ -14,10 +13,15 @@ db = DatabaseManager(
 )
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     from app.models.user import User, UserRole, UserProfile  # noqa: F401
     db.init_tables()
+    yield
+
+
+app = FastAPI(title=settings.service_name, version="1.0.0", lifespan=lifespan)
+app.add_middleware(TracingMiddleware)
 
 
 @app.get("/health")

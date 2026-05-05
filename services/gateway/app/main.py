@@ -1,4 +1,6 @@
 """Gateway service - API gateway with auth, rate limiting, and routing."""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import httpx
@@ -7,9 +9,6 @@ from shared.tracing import TracingMiddleware
 from shared.auth import verify_token
 from shared.cache import RedisClient
 from app.config import settings
-
-app = FastAPI(title=settings.service_name, version="1.0.0")
-app.add_middleware(TracingMiddleware)
 
 redis = RedisClient(url=settings.redis_url)
 
@@ -27,14 +26,15 @@ SERVICE_MAP = {
 PUBLIC_PATHS = {"/health", "/api/users/login", "/api/users/register"}
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await redis.connect()
-
-
-@app.on_event("shutdown")
-async def shutdown():
+    yield
     await redis.close()
+
+
+app = FastAPI(title=settings.service_name, version="1.0.0", lifespan=lifespan)
+app.add_middleware(TracingMiddleware)
 
 
 @app.get("/health")
@@ -53,8 +53,17 @@ async def proxy(request: Request, path: str):
             return JSONResponse(status_code=401, content={"code": 401, "message": "Missing token"})
         try:
             verify_token(auth_header[7:], settings.jwt_secret)
-        except ValueError:
+        except Exception:
             return JSONResponse(status_code=401, content={"code": 401, "message": "Invalid token"})
+
+    # Rate limiting via Redis
+    trace_id = request.headers.get("X-Trace-ID", "anonymous")
+    rate_key = f"rate:{trace_id}"
+    count = await redis.get(rate_key)
+    if count and int(count) > settings.rate_limit_rpm:
+        return JSONResponse(status_code=429, content={"code": 429, "message": "Rate limit exceeded"})
+    current = int(count or 0) + 1
+    await redis.set(rate_key, str(current), expire=60)
 
     # Route to target service
     target_url = None
