@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.schemas.user import RegisterRequest, LoginRequest, ProfileUpdateRequest
 from app.services.user_service import UserService
-from shared.auth import create_token
 from shared.database import DatabaseManager
 
 router = APIRouter()
@@ -34,15 +33,9 @@ def register(req: RegisterRequest, session: Session = Depends(get_write_session)
 
 @router.post("/login")
 def login(req: LoginRequest, session: Session = Depends(get_read_session)):
-    result = svc.login(session, req.username, req.password)
-    if result.get("code") == 200 and result.get("data", {}).get("token") == "placeholder":
-        token = create_token(
-            {"user_id": result["data"]["user"]["id"], "username": result["data"]["user"]["username"]},
-            secret=settings.jwt_secret,
-            expire_hours=settings.jwt_expire_hours,
-        )
-        result["data"]["token"] = token
-    return result
+    return svc.login(session, req.username, req.password,
+                     jwt_secret=settings.jwt_secret,
+                     jwt_expire_hours=settings.jwt_expire_hours)
 
 
 @router.get("/{user_id}")

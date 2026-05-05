@@ -29,9 +29,9 @@ def get_read_session():
 
 
 @router.post("/start")
-def start_crawl(req: CrawlStartRequest, bg: BackgroundTasks,
-                session: Session = Depends(get_write_session)):
-    result = svc.start_task(session, req)
+async def start_crawl(req: CrawlStartRequest, bg: BackgroundTasks,
+                      session: Session = Depends(get_write_session)):
+    result = await svc.start_task(session, req)
     if result.get("code") == 200:
         task_id = result["data"]["task_id"]
         bg.add_task(svc.execute_task, session, task_id)

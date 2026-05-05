@@ -116,7 +116,7 @@ async def proxy(request: Request, path: str):
     end
     return current
     """
-    count = await redis._client.eval(window_script, 1, rate_key, "60")
+    count = await redis.eval_script(window_script, 1, rate_key, "60")
     if count > settings.rate_limit_rpm:
         return JSONResponse(status_code=429, content={"code": 429, "message": "Rate limit exceeded"})
 

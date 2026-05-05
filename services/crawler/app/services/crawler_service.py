@@ -20,11 +20,9 @@ class CrawlerService:
         self._redis = redis
         self._kafka = kafka_producer
 
-    def start_task(self, session: Session, req: CrawlStartRequest):
+    async def start_task(self, session: Session, req: CrawlStartRequest):
         dedupe_key = f"crawl:lock:{req.platform}:{req.keyword}"
-        lock = asyncio.get_event_loop().run_until_complete(
-            self._redis.acquire_lock(dedupe_key, timeout=300)
-        )
+        lock = await self._redis.acquire_lock(dedupe_key, timeout=300)
         if not lock:
             return error("A crawl task for this keyword is already running", code=409)
 

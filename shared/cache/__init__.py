@@ -102,6 +102,10 @@ class RedisClient:
     async def exists(self, key: str) -> bool:
         return bool(await self._client.exists(key))
 
+    async def eval_script(self, script: str, numkeys: int, *args: str) -> Any:
+        """Execute a Redis Lua script. Wraps redis.eval for encapsulation."""
+        return await self._client.eval(script, numkeys, *args)
+
     async def cache_with_anti_penetration(self, key: str, value: Any, expire: int = 300, null_expire: int = 60) -> None:
         """Cache with cache penetration protection. Empty results cached with short TTL."""
         if value is None:

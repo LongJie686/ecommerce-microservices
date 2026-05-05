@@ -1,8 +1,6 @@
 """User business logic - registration uses transaction to ensure atomicity."""
 from __future__ import annotations
 
-import hashlib
-
 from sqlalchemy.orm import Session
 
 from app.repositories.user_repo import UserRepo
@@ -12,7 +10,13 @@ from shared.response import success, error, paginated
 
 
 def _hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    import bcrypt
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def _verify_password(password: str, password_hash: str) -> bool:
+    import bcrypt
+    return bcrypt.checkpw(password.encode(), password_hash.encode())
 
 
 class UserService:
@@ -29,14 +33,17 @@ class UserService:
         session.flush()
         return success({"id": user.id, "username": user.username})
 
-    def login(self, session: Session, username: str, password: str):
+    def login(self, session: Session, username: str, password: str, jwt_secret: str, jwt_expire_hours: int = 24):
         user = UserRepo.get_by_username(session, username)
-        if not user or user.password_hash != _hash_password(password):
+        if not user or not _verify_password(password, user.password_hash):
             return error("Invalid username or password", code=401)
         if user.status != 1:
             return error("Account is disabled", code=403)
 
-        token = create_token({"user_id": user.id, "username": user.username}, secret="placeholder")
+        token = create_token(
+            {"user_id": user.id, "username": user.username},
+            secret=jwt_secret, expire_hours=jwt_expire_hours,
+        )
         return success({
             "token": token,
             "user": {"id": user.id, "username": user.username, "nickname": user.nickname},
