@@ -1,6 +1,7 @@
 """User business logic - registration uses transaction to ensure atomicity."""
 from __future__ import annotations
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.repositories.user_repo import UserRepo
@@ -24,13 +25,18 @@ class UserService:
         if UserRepo.get_by_username(session, username):
             return error("Username already exists", code=409)
 
-        user = UserRepo.create_user(
-            session,
-            username=username,
-            password_hash=_hash_password(password),
-            nickname=nickname,
-        )
-        session.flush()
+        try:
+            user = UserRepo.create_user(
+                session,
+                username=username,
+                password_hash=_hash_password(password),
+                nickname=nickname,
+            )
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            return error("Username already exists", code=409)
+
         return success({"id": user.id, "username": user.username})
 
     def login(self, session: Session, username: str, password: str, jwt_secret: str, jwt_expire_hours: int = 24):

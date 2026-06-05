@@ -1,4 +1,5 @@
 """Gateway service configuration."""
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -13,7 +14,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # Auth
-    jwt_secret: str = "change-me-in-production"
+    jwt_secret: str = ""
 
     # Rate limiting
     rate_limit_rpm: int = 60
@@ -31,6 +32,15 @@ class Settings(BaseSettings):
     port: int = 8001
 
     model_config = {"env_file": ".env", "extra": "ignore"}
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def jwt_secret_must_be_strong(cls, v: str) -> str:
+        if not v:
+            raise ValueError("JWT_SECRET environment variable must be set")
+        if len(v) < 32:
+            raise ValueError("JWT_SECRET must be at least 32 characters")
+        return v
 
 
 settings = Settings()

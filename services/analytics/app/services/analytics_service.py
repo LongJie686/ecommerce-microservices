@@ -1,109 +1,115 @@
 """Analytics business logic - dashboard stats, price distribution, sales trends."""
 from __future__ import annotations
 
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+from datetime import datetime, timedelta, timezone
 
-from shared.response import success, error
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.models.analytics import PriceStats, SalesTrend, ShopRanking
+from shared.response import success
 
 
 class AnalyticsService:
     def dashboard(self, session: Session):
-        product_stats = session.execute(text(
-            "SELECT COUNT(*) as total, AVG(price) as avg_price, "
-            "MIN(price) as min_price, MAX(price) as max_price "
-            "FROM products WHERE status = 1"
-        )).fetchone()
+        price_row = session.query(
+            func.sum(PriceStats.product_count).label("total"),
+            func.avg(PriceStats.price_avg).label("avg_price"),
+            func.min(PriceStats.price_min).label("min_price"),
+            func.max(PriceStats.price_max).label("max_price"),
+        ).first()
 
-        category_dist = session.execute(text(
-            "SELECT c.name, COUNT(p.id) as cnt "
-            "FROM categories c LEFT JOIN products p ON c.id = p.category_id AND p.status = 1 "
-            "GROUP BY c.id, c.name ORDER BY cnt DESC LIMIT 10"
-        )).fetchall()
+        category_dist = (
+            session.query(PriceStats.category, PriceStats.product_count)
+            .order_by(PriceStats.product_count.desc())
+            .limit(10)
+            .all()
+        )
 
-        top_sales = session.execute(text(
-            "SELECT name, sales_count, price FROM products WHERE status = 1 "
-            "ORDER BY sales_count DESC LIMIT 10"
-        )).fetchall()
+        top_shops = (
+            session.query(ShopRanking.shop_name, ShopRanking.total_sales, ShopRanking.avg_rating)
+            .order_by(ShopRanking.total_sales.desc())
+            .limit(10)
+            .all()
+        )
 
         return success({
             "product_overview": {
-                "total": product_stats[0] if product_stats else 0,
-                "avg_price": round(float(product_stats[1] or 0), 2),
-                "min_price": float(product_stats[2] or 0),
-                "max_price": float(product_stats[3] or 0),
+                "total": int(price_row.total or 0),
+                "avg_price": round(float(price_row.avg_price or 0), 2),
+                "min_price": round(float(price_row.min_price or 0), 2),
+                "max_price": round(float(price_row.max_price or 0), 2),
             },
             "category_distribution": [
-                {"name": row[0], "count": row[1]} for row in category_dist
+                {"name": row.category, "count": row.product_count} for row in category_dist
             ],
             "top_sales": [
-                {"name": row[0], "sales": row[1], "price": float(row[2] or 0)} for row in top_sales
+                {"name": row.shop_name, "sales": row.total_sales,
+                 "avg_rating": round(float(row.avg_rating or 0), 1)}
+                for row in top_shops
             ],
         })
 
     def price_distribution(self, session: Session, category: str | None = None):
-        query = "SELECT price FROM products WHERE status = 1"
-        params = {}
+        query = session.query(PriceStats)
         if category:
-            query += " AND category_id IN (SELECT id FROM categories WHERE name = :cat)"
-            params["cat"] = category
+            query = query.filter(PriceStats.category == category)
+        rows = query.all()
 
-        rows = session.execute(text(query), params).fetchall()
-        prices = [float(r[0]) for r in rows if r[0]]
+        if not rows:
+            return success({"distribution": [], "total": 0})
 
-        if not prices:
-            return success({"ranges": [], "total": 0})
-
-        ranges = [
-            {"label": "0-100", "min": 0, "max": 100},
-            {"label": "100-500", "min": 100, "max": 500},
-            {"label": "500-1000", "min": 500, "max": 1000},
-            {"label": "1000-3000", "min": 1000, "max": 3000},
-            {"label": "3000+", "min": 3000, "max": float("inf")},
-        ]
-
-        distribution = []
-        for r in ranges:
-            count = sum(1 for p in prices if r["min"] <= p < r["max"])
-            distribution.append({"range": r["label"], "count": count, "percentage": round(count / len(prices) * 100, 1)})
-
-        return success({"distribution": distribution, "total": len(prices), "avg": round(sum(prices) / len(prices), 2)})
+        total = sum(r.product_count for r in rows)
+        return success({
+            "distribution": [
+                {
+                    "category": r.category,
+                    "price_min": r.price_min,
+                    "price_max": r.price_max,
+                    "price_avg": round(r.price_avg, 2),
+                    "price_median": round(r.price_median, 2),
+                    "count": r.product_count,
+                    "percentage": round(r.product_count / total * 100, 1) if total else 0,
+                }
+                for r in rows
+            ],
+            "total": total,
+        })
 
     def sales_trend(self, session: Session, category: str | None = None, days: int = 7):
-        query = """
-            SELECT DATE(created_at) as d, COUNT(*) as products, SUM(sales_count) as sales
-            FROM products WHERE status = 1 AND created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
-        """
-        params = {"days": days}
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+        query = session.query(SalesTrend).filter(SalesTrend.date >= cutoff)
         if category:
-            query += " AND category_id IN (SELECT id FROM categories WHERE name = :cat)"
-            params["cat"] = category
-
-        query += " GROUP BY DATE(created_at) ORDER BY d"
-        rows = session.execute(text(query), params).fetchall()
+            query = query.filter(SalesTrend.category == category)
+        rows = query.order_by(SalesTrend.date).all()
 
         return success({
-            "trend": [{"date": str(row[0]), "products": row[1], "sales": row[2] or 0} for row in rows],
+            "trend": [
+                {
+                    "date": row.date,
+                    "products": row.product_count,
+                    "sales": row.total_sales,
+                    "revenue": row.total_revenue,
+                }
+                for row in rows
+            ],
         })
 
     def shop_comparison(self, session: Session, platform: str | None = None):
-        query = """
-            SELECT shop_name, COUNT(*) as cnt, AVG(rating) as avg_rating,
-                   SUM(sales_count) as total_sales
-            FROM products WHERE status = 1
-        """
-        params = {}
+        query = session.query(ShopRanking)
         if platform:
-            query += " AND source = :platform"
-            params["platform"] = platform
-
-        query += " GROUP BY shop_name ORDER BY total_sales DESC LIMIT 20"
-        rows = session.execute(text(query), params).fetchall()
+            query = query.filter(ShopRanking.platform == platform)
+        rows = query.order_by(ShopRanking.total_sales.desc()).limit(20).all()
 
         return success({
             "shops": [
-                {"name": row[0], "product_count": row[1],
-                 "avg_rating": round(float(row[2] or 0), 1), "total_sales": row[3] or 0}
+                {
+                    "name": row.shop_name,
+                    "platform": row.platform,
+                    "product_count": row.product_count,
+                    "avg_rating": round(float(row.avg_rating or 0), 1),
+                    "total_sales": row.total_sales,
+                }
                 for row in rows
             ],
         })

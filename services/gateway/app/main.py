@@ -1,5 +1,6 @@
 """Gateway service - API gateway with auth, rate limiting, circuit breaker, and routing."""
 from contextlib import asynccontextmanager
+import asyncio
 import time
 import logging
 
@@ -30,30 +31,34 @@ class CircuitBreaker:
         self._failure_count: dict[str, int] = {}
         self._state: dict[str, str] = {}  # "closed", "open", "half_open"
         self._last_failure_time: dict[str, float] = {}
+        self._lock = asyncio.Lock()
 
-    def is_available(self, service: str) -> bool:
-        state = self._state.get(service, "closed")
-        if state == "closed":
-            return True
-        if state == "open":
-            elapsed = time.time() - self._last_failure_time.get(service, 0)
-            if elapsed >= self.recovery_timeout:
-                self._state[service] = "half_open"
+    async def is_available(self, service: str) -> bool:
+        async with self._lock:
+            state = self._state.get(service, "closed")
+            if state == "closed":
                 return True
-            return False
-        return True  # half_open: allow one probe request
+            if state == "open":
+                elapsed = time.time() - self._last_failure_time.get(service, 0)
+                if elapsed >= self.recovery_timeout:
+                    self._state[service] = "half_open"
+                    return True
+                return False
+            return True  # half_open: allow one probe request
 
-    def record_success(self, service: str) -> None:
-        self._failure_count[service] = 0
-        self._state[service] = "closed"
+    async def record_success(self, service: str) -> None:
+        async with self._lock:
+            self._failure_count[service] = 0
+            self._state[service] = "closed"
 
-    def record_failure(self, service: str) -> None:
-        count = self._failure_count.get(service, 0) + 1
-        self._failure_count[service] = count
-        self._last_failure_time[service] = time.time()
-        if count >= self.failure_threshold:
-            self._state[service] = "open"
-            logger.warning("Circuit breaker OPEN for %s after %d failures", service, count)
+    async def record_failure(self, service: str) -> None:
+        async with self._lock:
+            count = self._failure_count.get(service, 0) + 1
+            self._failure_count[service] = count
+            self._last_failure_time[service] = time.time()
+            if count >= self.failure_threshold:
+                self._state[service] = "open"
+                logger.warning("Circuit breaker OPEN for %s after %d failures", service, count)
 
     @property
     def state_summary(self) -> dict:
@@ -106,9 +111,12 @@ async def proxy(request: Request, path: str):
         except Exception:
             return JSONResponse(status_code=401, content={"code": 401, "message": "Invalid token"})
 
-    # Rate limiting: atomic sliding window via Redis Lua script
-    trace_id = request.headers.get("X-Trace-ID", "anonymous")
-    rate_key = f"rate:{trace_id}"
+    # Rate limiting: atomic sliding window via Redis Lua script, keyed by real client IP
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    client_ip = forwarded_for.split(",")[0].strip() if forwarded_for else (
+        request.client.host if request.client else "unknown"
+    )
+    rate_key = f"rate:{client_ip}"
     window_script = """
     local current = redis.call("INCR", KEYS[1])
     if current == 1 then
@@ -133,7 +141,7 @@ async def proxy(request: Request, path: str):
         return JSONResponse(status_code=404, content={"code": 404, "message": "Service not found"})
 
     # Circuit breaker check
-    if not circuit_breaker.is_available(target_prefix):
+    if not await circuit_breaker.is_available(target_prefix):
         return JSONResponse(status_code=503, content={
             "code": 503, "message": f"Service {target_prefix} temporarily unavailable (circuit open)"
         })
@@ -151,12 +159,12 @@ async def proxy(request: Request, path: str):
                 params=dict(request.query_params),
             )
         if resp.status_code >= 500:
-            circuit_breaker.record_failure(target_prefix)
+            await circuit_breaker.record_failure(target_prefix)
         else:
-            circuit_breaker.record_success(target_prefix)
+            await circuit_breaker.record_success(target_prefix)
         return JSONResponse(status_code=resp.status_code, content=resp.json())
     except (httpx.ConnectError, httpx.TimeoutException) as e:
-        circuit_breaker.record_failure(target_prefix)
+        await circuit_breaker.record_failure(target_prefix)
         logger.error("Service %s connection failed: %s", target_prefix, str(e))
         return JSONResponse(status_code=502, content={
             "code": 502, "message": f"Service unavailable: {target_prefix}"

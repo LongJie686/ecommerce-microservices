@@ -1,16 +1,13 @@
 """Analytics API routes."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.config import settings
+from app.dependencies import db
 from app.services.analytics_service import AnalyticsService
-from shared.database import DatabaseManager
 
 router = APIRouter()
-
-db = DatabaseManager(write_url=settings.database_url, read_url=settings.read_database_url)
 svc = AnalyticsService()
 
 
@@ -29,7 +26,11 @@ def price_distribution(category: str | None = None, session: Session = Depends(g
 
 
 @router.get("/sales-trend")
-def sales_trend(category: str | None = None, days: int = 7, session: Session = Depends(get_read_session)):
+def sales_trend(
+    category: str | None = None,
+    days: int = Query(default=7, ge=1, le=365),
+    session: Session = Depends(get_read_session),
+):
     return svc.sales_trend(session, category, days)
 
 

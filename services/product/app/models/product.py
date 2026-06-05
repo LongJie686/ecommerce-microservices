@@ -1,10 +1,13 @@
 """Product service ORM models - demonstrates read/write splitting and Redis caching."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 from decimal import Decimal
 
-from sqlalchemy import String, DateTime, Text, Index, Integer, Numeric, ForeignKey
+from sqlalchemy import Column, String, DateTime, Text, Index, Integer, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 
 from shared.database import Base
@@ -13,11 +16,11 @@ from shared.database import Base
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Integer(primary_key=True, autoincrement=True)
-    name = String(100, nullable=False)
-    parent_id = Integer(ForeignKey("categories.id"), nullable=True)
-    sort_order = Integer(default=0)
-    created_at = DateTime(default=datetime.utcnow)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    sort_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=_utcnow)
 
     products = relationship("Product", back_populates="category")
 
@@ -29,22 +32,22 @@ class Category(Base):
 class Product(Base):
     __tablename__ = "products"
 
-    id = Integer(primary_key=True, autoincrement=True)
-    name = String(200, nullable=False)
-    category_id = Integer(ForeignKey("categories.id"), nullable=False, index=True)
-    price = Numeric(10, 2, nullable=False)
-    original_price = Numeric(10, 2, nullable=True)
-    description = Text(default="")
-    image_url = String(500, default="")
-    stock = Integer(default=0)
-    sales_count = Integer(default=0)
-    rating = Numeric(3, 1, default=Decimal("0.0"))
-    source = String(50, default="")  # jd, taobao
-    source_url = String(500, default="")
-    status = Integer(default=1)  # 1=on_sale, 0=off_sale
-    is_deleted = Integer(default=0, nullable=False)  # logical deletion: 0=normal, 1=deleted
-    created_at = DateTime(default=datetime.utcnow)
-    updated_at = DateTime(default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(200), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False, index=True)
+    price = Column(Numeric(10, 2), nullable=False)
+    original_price = Column(Numeric(10, 2), nullable=True)
+    description = Column(Text, default="")
+    image_url = Column(String(500), default="")
+    stock = Column(Integer, default=0)
+    sales_count = Column(Integer, default=0)
+    rating = Column(Numeric(3, 1), default=Decimal("0.0"))
+    source = Column(String(50), default="")  # jd, taobao
+    source_url = Column(String(500), default="")
+    status = Column(Integer, default=1)  # 1=on_sale, 0=off_sale
+    is_deleted = Column(Integer, default=0, nullable=False)  # logical deletion: 0=normal, 1=deleted
+    created_at = Column(DateTime, default=_utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     category = relationship("Category", back_populates="products")
 

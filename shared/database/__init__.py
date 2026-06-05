@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 from typing import Generator
 
 from sqlalchemy import create_engine
@@ -49,6 +50,19 @@ class DatabaseManager:
         session = self._read_session()
         try:
             yield session
+        finally:
+            session.close()
+
+    @contextmanager
+    def write_session_ctx(self) -> Generator[Session, None, None]:
+        """Context manager for use outside of FastAPI Depends (e.g. background tasks)."""
+        session = self._write_session()
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
         finally:
             session.close()
 

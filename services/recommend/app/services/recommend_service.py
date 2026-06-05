@@ -41,8 +41,9 @@ class RecommendService:
         ab_group = "A"
 
         if ab_config:
+            safe_ratio = max(0.01, min(0.99, ab_config.ratio))
             bucket = int(hashlib.md5(str(req.user_id).encode()).hexdigest(), 16) % 100
-            if bucket < ab_config.ratio * 100:
+            if bucket < safe_ratio * 100:
                 strategy = ab_config.strategy_a
                 ab_group = "A"
             else:

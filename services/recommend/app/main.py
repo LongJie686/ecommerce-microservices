@@ -3,16 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from shared.tracing import TracingMiddleware
-from shared.database import DatabaseManager
-from shared.cache import RedisClient
 from app.config import settings
-from app.routers import recommend as recommend_router
-
-db = DatabaseManager(
-    write_url=settings.database_url,
-    read_url=settings.read_database_url,
-)
-redis = RedisClient(url=settings.redis_url)
+from app.dependencies import db, redis
 
 
 @asynccontextmanager
@@ -33,4 +25,5 @@ async def health():
     return {"status": "ok", "service": settings.service_name}
 
 
+from app.routers import recommend as recommend_router  # noqa: E402
 app.include_router(recommend_router.router, prefix="/api/recommend", tags=["recommend"])

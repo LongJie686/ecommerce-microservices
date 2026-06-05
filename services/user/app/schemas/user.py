@@ -13,8 +13,8 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Field(..., min_length=1, max_length=50)
+    password: str = Field(..., min_length=1, max_length=72)  # bcrypt truncates at 72 bytes
 
 
 class ProfileUpdateRequest(BaseModel):

@@ -83,7 +83,12 @@ class RedisClient:
         if self._client:
             await self._client.close()
 
+    def _ensure_connected(self) -> None:
+        if self._client is None:
+            raise RuntimeError("RedisClient is not connected. Call await connect() first.")
+
     async def get(self, key: str) -> str | None:
+        self._ensure_connected()
         return await self._client.get(key)
 
     async def get_json(self, key: str) -> Any | None:
@@ -91,19 +96,23 @@ class RedisClient:
         return json.loads(val) if val else None
 
     async def set(self, key: str, value: str, expire: int | None = None) -> None:
+        self._ensure_connected()
         await self._client.set(key, value, ex=expire)
 
     async def set_json(self, key: str, value: Any, expire: int | None = None) -> None:
         await self.set(key, json.dumps(value, ensure_ascii=False), expire)
 
     async def delete(self, *keys: str) -> int:
+        self._ensure_connected()
         return await self._client.delete(*keys)
 
     async def exists(self, key: str) -> bool:
+        self._ensure_connected()
         return bool(await self._client.exists(key))
 
     async def eval_script(self, script: str, numkeys: int, *args: str) -> Any:
         """Execute a Redis Lua script. Wraps redis.eval for encapsulation."""
+        self._ensure_connected()
         return await self._client.eval(script, numkeys, *args)
 
     async def cache_with_anti_penetration(self, key: str, value: Any, expire: int = 300, null_expire: int = 60) -> None:

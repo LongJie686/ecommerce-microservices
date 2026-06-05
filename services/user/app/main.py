@@ -3,14 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from shared.tracing import TracingMiddleware
-from shared.database import DatabaseManager
 from app.config import settings
-from app.routers import user as user_router
-
-db = DatabaseManager(
-    write_url=settings.database_url,
-    read_url=settings.read_database_url,
-)
+from app.dependencies import db
 
 
 @asynccontextmanager
@@ -29,4 +23,5 @@ async def health():
     return {"status": "ok", "service": settings.service_name}
 
 
+from app.routers import user as user_router  # noqa: E402
 app.include_router(user_router.router, prefix="/api/users", tags=["user"])

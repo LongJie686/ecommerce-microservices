@@ -5,16 +5,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.dependencies import db, redis
 from app.schemas.recommend import BehaviorRequest, RecommendRequest
 from app.services.recommend_service import RecommendService
-from shared.cache import RedisClient
-from shared.database import DatabaseManager
 
 router = APIRouter()
-
-db = DatabaseManager(write_url=settings.database_url, read_url=settings.read_database_url)
-redis = RedisClient(url=settings.redis_url)
-
 svc = RecommendService(redis, cache_ttl=settings.recommend_cache_ttl)
 
 
@@ -32,7 +27,7 @@ def record_behavior(req: BehaviorRequest, session: Session = Depends(get_write_s
 
 
 @router.post("")
-async def get_recommendations(req: RecommendRequest, session: Session = Depends(get_read_session)):
+async def get_recommendations(req: RecommendRequest, session: Session = Depends(get_write_session)):
     return await svc.get_recommendations(session, req)
 
 

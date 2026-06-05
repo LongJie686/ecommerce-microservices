@@ -1,7 +1,7 @@
 """Product business logic - Redis caching with anti-penetration/avalanche."""
 from __future__ import annotations
 
-from decimal import Decimal
+import hashlib
 
 from sqlalchemy.orm import Session
 
@@ -40,15 +40,17 @@ class ProductService:
         session.flush()
         return success({"id": product.id, "name": product.name})
 
-    def update_product(self, session: Session, product_id: int, data: ProductUpdate):
+    async def update_product(self, session: Session, product_id: int, data: ProductUpdate):
         product = ProductRepo.update(session, product_id, **data.model_dump(exclude_none=True))
         if not product:
             return error("Product not found", code=404)
+        await self._redis.delete(f"product:{product_id}")
         return success({"id": product.id, "name": product.name})
 
     async def list_products(self, session: Session, category_id: int | None = None,
                             keyword: str | None = None, page: int = 1, page_size: int = 20):
-        cache_key = f"products:{category_id}:{keyword}:{page}:{page_size}"
+        keyword_hash = hashlib.sha256((keyword or "").encode()).hexdigest()[:16]
+        cache_key = f"products:{category_id}:{keyword_hash}:{page}:{page_size}"
         cached = await self._redis.get_with_anti_penetration(cache_key)
         if cached is not None:
             return cached

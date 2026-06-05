@@ -1,21 +1,16 @@
 """User API routes - controller layer, only handles request/response."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.dependencies import db
 from app.schemas.user import RegisterRequest, LoginRequest, ProfileUpdateRequest
 from app.services.user_service import UserService
-from shared.database import DatabaseManager
 
 router = APIRouter()
 svc = UserService()
-
-db = DatabaseManager(
-    write_url=settings.database_url,
-    read_url=settings.read_database_url,
-)
 
 
 def get_write_session():
@@ -32,7 +27,7 @@ def register(req: RegisterRequest, session: Session = Depends(get_write_session)
 
 
 @router.post("/login")
-def login(req: LoginRequest, session: Session = Depends(get_read_session)):
+def login(req: LoginRequest, session: Session = Depends(get_write_session)):
     return svc.login(session, req.username, req.password,
                      jwt_secret=settings.jwt_secret,
                      jwt_expire_hours=settings.jwt_expire_hours)
@@ -49,5 +44,9 @@ def update_profile(user_id: int, req: ProfileUpdateRequest, session: Session = D
 
 
 @router.get("")
-def list_users(page: int = 1, page_size: int = 20, session: Session = Depends(get_read_session)):
+def list_users(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    session: Session = Depends(get_read_session),
+):
     return svc.list_users(session, page, page_size)

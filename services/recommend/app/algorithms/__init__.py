@@ -5,6 +5,7 @@ import random
 from collections import defaultdict
 from typing import Any
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.models.recommend import UserBehavior
@@ -72,7 +73,7 @@ class ContentBasedRecommender:
         interacted = {b.product_id for b in behaviors}
 
         query = session.execute(
-            "SELECT id, sales_count FROM products WHERE status = 1 LIMIT 500"
+            text("SELECT id, sales_count FROM products WHERE status = 1 LIMIT 500")
         )
         candidates = []
         for row in query:
@@ -92,8 +93,8 @@ class HotRecommender:
 
     def recommend(self, session: Session, top_k: int = 10) -> list[dict[str, Any]]:
         query = session.execute(
-            "SELECT id, sales_count FROM products WHERE status = 1 "
-            "ORDER BY sales_count DESC LIMIT :limit",
+            text("SELECT id, sales_count FROM products WHERE status = 1 "
+                 "ORDER BY sales_count DESC LIMIT :limit"),
             {"limit": top_k},
         )
         return [{"product_id": row[0], "score": float(row[1] or 0), "strategy": "hot"} for row in query]
